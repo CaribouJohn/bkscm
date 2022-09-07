@@ -23,15 +23,16 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "bkscm" is now active!');
 
-	const gitSCM = vscode.scm.createSourceControl('bk', 'BitKeeper');
-	const workingTree = gitSCM.createResourceGroup('workingTree', 'Changes');
+	const bkSCM = vscode.scm.createSourceControl('bk', 'BitKeeper');
+	const workingTree = bkSCM.createResourceGroup('workingTree', 'Changes');
+
+	//need to initialize the current state of the repo. 
 
 	//const index = gitSCM.createResourceGroup('index', 'Index');
 	// index.resourceStates = [
 	//   { resourceUri: createResourceUri('README.md') },
 	//   { resourceUri: createResourceUri('src/test/api.ts') }
 	// ];
-
 
 	// workingTree.resourceStates = [
 	//   { resourceUri: createResourceUri('.travis.yml') },
