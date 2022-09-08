@@ -2002,21 +2002,37 @@ export class Repository implements Disposable {
 		const merge: Resource[] = [];
 		const untracked: Resource[] = [];
 
+
+// d------(-d) a directory containing BitKeeper files;
+// D------(-D) a  directory  containing  no BitKeeper files(but may
+//                          have subdirectories with BitKeeper files).
+// i------(-i) a file that is extra but is normally ignored;
+// j------(-j) extra file under / dir;
+// R------(-R) the file is a sub - repository root(overrides - d);
+// s------(-s) a file that is under BitKeeper control;
+// x------(-x) a file that is not under BitKeeper control;
+// sl----- (-l) a BitKeeper file that is locked;
+// su----- (-u) a BitKeeper file that is not locked;
+// slc----(-c) a BitKeeper file that is  locked  and  modified(aka
+//                          changed);
+// s--p-- - (-p) a BitKeeper file that has one or more pending deltas;
+// s-- - G-- (-G) a BitKeeper file that is checked out(aka gotten);
+// s----n - (-n) a BitKeeper file that is not in its recorded location;
+// s----- y(-y) a BitKeeper file that has saved checkin comments;
+// x----- y(-y) an extra file that has saved checkin comments
+		
 		status.forEach(raw => {
 			const uri = Uri.file(path.join(this.repository.root, raw.path));
 			const renameUri = raw.rename
 				? Uri.file(path.join(this.repository.root, raw.rename))
 				: undefined;
 
-			switch (raw.x + raw.y) {
-				case '??': switch (untrackedChanges) {
+			
+			
+			switch (raw.bitkeeper) {
+				case 'x------': switch (untrackedChanges) {
 					case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
 					case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.UNTRACKED, useIcons));
-					default: return undefined;
-				}
-				case '!!': switch (untrackedChanges) {
-					case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.IGNORED, useIcons));
-					case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.IGNORED, useIcons));
 					default: return undefined;
 				}
 				case 'DD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_DELETED, useIcons));
@@ -2028,7 +2044,7 @@ export class Repository implements Disposable {
 				case 'UU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_MODIFIED, useIcons));
 			}
 
-			switch (raw.x) {
+			switch (raw.bitkeeper) {
 				case 'M': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_MODIFIED, useIcons)); break;
 				case 'A': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_ADDED, useIcons)); break;
 				case 'D': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_DELETED, useIcons)); break;
@@ -2036,7 +2052,7 @@ export class Repository implements Disposable {
 				case 'C': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_COPIED, useIcons, renameUri)); break;
 			}
 
-			switch (raw.y) {
+			switch (raw.bitkeeper) {
 				case 'M': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons, renameUri)); break;
 				case 'D': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.DELETED, useIcons, renameUri)); break;
 				case 'A': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.INTENT_TO_ADD, useIcons, renameUri)); break;

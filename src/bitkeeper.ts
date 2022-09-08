@@ -29,8 +29,7 @@ export interface IBk {
 }
 
 export interface IFileStatus {
-	x: string;
-	y: string;
+	bitkeeper: string;
 	path: string;
 	rename?: string;
 }
@@ -654,12 +653,12 @@ export class Bk {
 	}
 
 	async mergeFile(options: { input1Path: string; input2Path: string; basePath: string; diff3?: boolean }): Promise<string> {
-		const args = ['merge-file', '-p', options.input1Path, options.basePath, options.input2Path];
-		if (options.diff3) {
-			args.push('--diff3');
-		} else {
-			args.push('--no-diff3');
-		}
+		const args = ['merge', '-p', options.input1Path, options.basePath, options.input2Path];
+		// if (options.diff3) {
+		// 	args.push('--diff3');
+		// } else {
+		// 	args.push('--no-diff3');
+		// }
 
 		try {
 			const result = await this.exec('', args);
@@ -708,32 +707,33 @@ export class BkStatusParser {
 		this.lastRaw = raw.substr(i);
 	}
 
+
 	private parseEntry(raw: string, i: number): number | undefined {
-		if (i + 4 >= raw.length) {
+		if (i + 7 >= raw.length) {
 			return;
 		}
 
 		let lastIndex: number;
 		const entry: IFileStatus = {
-			x: raw.charAt(i++),
-			y: raw.charAt(i++),
+			bitkeeper: raw.substring(i, i + 7),
 			rename: undefined,
 			path: ''
 		};
-
+		i = i + 7;
 		// space
 		i++;
+		//to the end
 
-		if (entry.x === 'R' || entry.x === 'C') {
-			lastIndex = raw.indexOf('\0', i);
+		// if (entry.x === 'R' || entry.x === 'C') {
+		// 	lastIndex = raw.indexOf('\0', i);
 
-			if (lastIndex === -1) {
-				return;
-			}
+		// 	if (lastIndex === -1) {
+		// 		return;
+		// 	}
 
-			entry.rename = raw.substring(i, lastIndex);
-			i = lastIndex + 1;
-		}
+		// 	entry.rename = raw.substring(i, lastIndex);
+		// 	i = lastIndex + 1;
+		// }
 
 		lastIndex = raw.indexOf('\0', i);
 
@@ -751,6 +751,50 @@ export class BkStatusParser {
 		return lastIndex + 1;
 	}
 }
+
+// 	private parseEntry(raw: string, i: number): number | undefined {
+// 		if (i + 4 >= raw.length) {
+// 			return;
+// 		}
+
+// 		let lastIndex: number;
+// 		const entry: IFileStatus = {
+// 			x: raw.charAt(i++),
+// 			y: raw.charAt(i++),
+// 			rename: undefined,
+// 			path: ''
+// 		};
+
+// 		// space
+// 		i++;
+
+// 		if (entry.x === 'R' || entry.x === 'C') {
+// 			lastIndex = raw.indexOf('\0', i);
+
+// 			if (lastIndex === -1) {
+// 				return;
+// 			}
+
+// 			entry.rename = raw.substring(i, lastIndex);
+// 			i = lastIndex + 1;
+// 		}
+
+// 		lastIndex = raw.indexOf('\0', i);
+
+// 		if (lastIndex === -1) {
+// 			return;
+// 		}
+
+// 		entry.path = raw.substring(i, lastIndex);
+
+// 		// If path ends with slash, it must be a nested bk repo
+// 		if (entry.path[entry.path.length - 1] !== '/') {
+// 			this.result.push(entry);
+// 		}
+
+// 		return lastIndex + 1;
+// 	}
+// }
 
 export interface Submodule {
 	name: string;
@@ -959,7 +1003,7 @@ export class Repository {
 
 	async log(options?: LogOptions): Promise<Commit[]> {
 		const maxEntries = options?.maxEntries ?? 32;
-		const args = ['log', `-n${maxEntries}`, `--format=${COMMIT_FORMAT}`, '-z', '--'];
+		const args = ['log', `-${maxEntries}`, `--format=${COMMIT_FORMAT}`, '-z', '--'];
 		if (options?.path) {
 			args.push(options.path);
 		}
@@ -1918,7 +1962,7 @@ export class Repository {
 		return new Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean }>((c, e) => {
 			const parser = new BkStatusParser();
 			const env = { GIT_OPTIONAL_LOCKS: '0' };
-			const args = ['-r', 'gfiles', '-cgxvp'];
+			const args = ['gfiles', '-0' , '-cgxvp'];
 
 			// if (opts?.untrackedChanges === 'hidden') {
 			// 	args.push('-uno');
