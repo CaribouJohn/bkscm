@@ -118,7 +118,7 @@ export interface RepositoryState {
 
 export interface RepositoryUIState {
   readonly selected: boolean;
-  //readonly onDidChange: Event<void>;
+  readonly onDidChange: Event<void>;
 }
 
 /**

@@ -16,7 +16,9 @@
     "scmValidation",
     "tabInputTextMerge",
     "timeline",
-    "contribMergeEditorMenus"
+    "contribMergeEditorMenus",
+    "telemetry",
+    "resolvers"
   ],
   "categories": [
     "Other"

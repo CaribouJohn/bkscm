@@ -334,19 +334,19 @@ export class Model  {
 			return;
 		}
 
-		if (!workspace.isTrusted) {
-			// Check if the folder is a bare repo: if it has a file named HEAD && `rev-parse --show -cdup` is empty
-			try {
-				fs.accessSync(path.join(repoPath, 'HEAD'), fs.constants.F_OK);
-				const result = await this.bk.exec(repoPath, ['-C', repoPath, 'rev-parse', '--show-cdup']);
-				if (result.stderr.trim() === '' && result.stdout.trim() === '') {
-					this.outputChannelLogger.logTrace(`Bare repository: ${repoPath}`);
-					return;
-				}
-			} catch {
-				// If this throw, we should be good to open the repo (e.g. HEAD doesn't exist)
-			}
-		}
+		// if (!workspace.isTrusted) {
+		// 	// Check if the folder is a bare repo: if it has a file named HEAD && `rev-parse --show -cdup` is empty
+		// 	try {
+		// 		fs.accessSync(path.join(repoPath, 'HEAD'), fs.constants.F_OK);
+		// 		const result = await this.bk.exec(repoPath, ['-C', repoPath, 'rev-parse', '--show-cdup']);
+		// 		if (result.stderr.trim() === '' && result.stdout.trim() === '') {
+		// 			this.outputChannelLogger.logTrace(`Bare repository: ${repoPath}`);
+		// 			return;
+		// 		}
+		// 	} catch {
+		// 		// If this throw, we should be good to open the repo (e.g. HEAD doesn't exist)
+		// 	}
+		// }
 
 		try {
 			const rawRoot = await this.bk.getRepositoryRoot(repoPath);

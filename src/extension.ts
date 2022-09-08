@@ -1,3 +1,6 @@
+import * as nls from 'vscode-nls';
+const localize = nls.loadMessageBundle();
+
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { commands,Disposable, env, ExtensionContext, Uri, window, workspace } from 'vscode';
@@ -6,7 +9,6 @@ import { OutputChannelLogger } from './log';
 import { Model } from './model';
 import * as path from 'path';
 import * as os from 'os';
-import { localize } from 'vscode-nls';
 import { eventToPromise, filterEvent, toDisposable } from './util';
 import { BkFileSystemProvider } from './fileSystemProvider';
 import { CommandCenter } from './commands';
@@ -104,15 +106,18 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 	}
 
 	const info = await findBk(pathHints, bkPath => {
-		outputChannelLogger.logInfo(localize('validating', "Validating found bk in: {0}", bkPath));
+		//outputChannelLogger.logInfo(localize('validating', "Validating found bk in: {0}", bkPath));
+		//console.log(localize('validating', "Validating found bk in: {0}", bkPath));
 		if (excludes.length === 0) {
 			return true;
 		}
 
 		const normalized = path.normalize(bkPath).replace(/[\r\n]+$/, '');
 		const skip = excludes.some(e => normalized.startsWith(e));
+		console.log(normalized, skip);
 		if (skip) {
 			outputChannelLogger.logInfo(localize('skipped', "Skipped found bk in: {0}", bkPath));
+			console.log(localize('skipped', "Skipped found bk in: {0}", bkPath));
 		}
 		return !skip;
 	});

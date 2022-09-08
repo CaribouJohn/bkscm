@@ -61,7 +61,12 @@ export interface LogFileOptions {
 }
 
 function parseVersion(raw: string): string {
-	return raw.replace(/^bk version /, '');
+	let regex = /version: bk-([\d]+[.])*[\d]/gm;
+	let res = regex.exec(raw);
+	if (res) {
+		return res[0].replace(/version: bk-/,'');
+	}
+	return "Unknown";
 }
 
 function findSpecificBk(path: string, onValidate: (path: string) => boolean): Promise<IBk> {
@@ -127,7 +132,7 @@ function findSystemBkWin32(base: string, onValidate: (path: string) => boolean):
 		return Promise.reject<IBk>('Not found');
 	}
 
-	return findSpecificBk(path.join(base, 'Bk', 'cmd', 'bk.exe'), onValidate);
+	return findSpecificBk(path.join(base, 'BitKeeper', 'bk.exe'), onValidate);
 }
 
 function findBkWin32InPath(onValidate: (path: string) => boolean): Promise<IBk> {
@@ -470,15 +475,12 @@ export class Bk {
 	}
 
 	async getRepositoryRoot(repositoryPath: string): Promise<string> {
-		const result = await this.exec(repositoryPath, ['rev-parse', '--show-toplevel']);
+		const result = await this.exec(repositoryPath, ['root']);
 
 		// Keep trailing spaces which are part of the directory name
 		const repoPath = path.normalize(result.stdout.trimLeft().replace(/[\r\n]+$/, ''));
 
 		if (isWindows) {
-			// On Bk 2.25+ if you call `rev-parse --show-toplevel` on a mapped drive, instead of getting the mapped
-			// drive path back, you get the UNC path for the mapped drive. So we will try to normalize it back to the
-			// mapped drive path, if possible
 			const repoUri = Uri.file(repoPath);
 			const pathUri = Uri.file(repositoryPath);
 			if (repoUri.authority.length !== 0 && pathUri.authority.length === 0) {
@@ -511,8 +513,9 @@ export class Bk {
 	}
 
 	async getRepositoryDotBk(repositoryPath: string): Promise<{ path: string; commonPath?: string }> {
-		const result = await this.exec(repositoryPath, ['rev-parse', '--bk-dir', '--bk-common-dir']);
-		let [dotBkPath, commonDotBkPath] = result.stdout.split('\n').map(r => r.trim());
+		const result = await this.exec(repositoryPath, ['root']);
+		let dotBkPath = result.stdout;
+		let commonDotBkPath = path.join(dotBkPath, 'BitKeeper');
 
 		if (!path.isAbsolute(dotBkPath)) {
 			dotBkPath = path.join(repositoryPath, dotBkPath);
@@ -1915,17 +1918,17 @@ export class Repository {
 		return new Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean }>((c, e) => {
 			const parser = new BkStatusParser();
 			const env = { GIT_OPTIONAL_LOCKS: '0' };
-			const args = ['status', '-z'];
+			const args = ['-r', 'gfiles', '-cgxvp'];
 
-			if (opts?.untrackedChanges === 'hidden') {
-				args.push('-uno');
-			} else {
-				args.push('-uall');
-			}
+			// if (opts?.untrackedChanges === 'hidden') {
+			// 	args.push('-uno');
+			// } else {
+			// 	args.push('-uall');
+			// }
 
-			if (opts?.ignoreSubmodules) {
-				args.push('--ignore-submodules');
-			}
+			// if (opts?.ignoreSubmodules) {
+			// 	args.push('--ignore-submodules');
+			// }
 
 			const child = this.stream(args, { env });
 
