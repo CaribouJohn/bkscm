@@ -1,17 +1,50 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
-		"target": "ES2020",
-		"outDir": "out",
+		"target": "es2020",
 		"lib": [
-			"ES2020"
+			"ES2016",
+			"ES2017.Object",
+			"ES2017.String",
+			"ES2017.Intl",
+			"ES2017.TypedArrays",
+			"ES2018.AsyncIterable",
+			"ES2018.AsyncGenerator",
+			"ES2018.Promise",
+			"ES2018.Regexp",
+			"ES2018.Intl",
+			"ES2019.Array",
+			"ES2019.Object",
+			"ES2019.String",
+			"ES2019.Symbol",
+			"ES2020.BigInt",
+			"ES2020.Promise",
+			"ES2020.String",
+			"ES2020.Symbol.WellKnown",
+			"ES2020.Intl",
+			"ES2021.Promise",
+			"ES2021.String",
+			"ES2021.WeakRef"
+		],
+		"module": "commonjs",
+		"strict": true,
+		"exactOptionalPropertyTypes": false,
+		"useUnknownInCatchVariables": false,
+		"alwaysStrict": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitOverride": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"forceConsistentCasingInFileNames": true,
+		"experimentalDecorators": true,
+		"outDir": "out",
+		"typeRoots": [
+			"./node_modules/@types"
 		],
 		"sourceMap": true,
 		"rootDir": "src",
-		"strict": true   /* enable all strict type-checking options */
-		/* Additional Checks */
-		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-		// "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-		// "noUnusedParameters": true,  /* Report errors on unused parameters. */
-	}
+	},
+	"include": [
+		"src/**/*"
+		]
 }

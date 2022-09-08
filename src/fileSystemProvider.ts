@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace, Uri, Disposable, Event, EventEmitter, window, FileSystemProvider, FileChangeEvent, FileStat, FileType, FileChangeType, FileSystemError } from 'vscode';
-//import { debounce, throttle } from './decorators';
-//import { fromGitUri, toGitUri } from './uri';
-//import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model';
-//import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util';
-//import { Repository } from './repository';
+import { debounce, throttle } from './decorators';
+import { fromBkUri, toBkUri } from './uri';
+import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util';
+import { Repository } from './repository';
+import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model';
+import { TextEncoder } from 'util';
 
 interface CacheRow {
 	uri: Uri;
@@ -33,7 +34,7 @@ function sanitizeRef(ref: string, path: string, repository: Repository): string 
 	return ref;
 }
 
-export class GitFileSystemProvider implements FileSystemProvider {
+export class BkFileSystemProvider implements FileSystemProvider {
 
 	private _onDidChangeFile = new EventEmitter<FileChangeEvent[]>();
 	readonly onDidChangeFile: Event<FileChangeEvent[]> = this._onDidChangeFile.event;
@@ -47,7 +48,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 		this.disposables.push(
 			model.onDidChangeRepository(this.onDidChangeRepository, this),
 			model.onDidChangeOriginalResource(this.onDidChangeOriginalResource, this),
-			workspace.registerFileSystemProvider('git', this, { isReadonly: true, isCaseSensitive: true }),
+			workspace.registerFileSystemProvider('gk', this, { isReadonly: true, isCaseSensitive: true }),
 		);
 
 		setInterval(() => this.cleanup(), FIVE_MINUTES);
@@ -63,9 +64,9 @@ export class GitFileSystemProvider implements FileSystemProvider {
 			return;
 		}
 
-		const gitUri = toGitUri(uri, '', { replaceFileExtension: true });
+		const gkUri = toBkUri(uri, '', { replaceFileExtension: true });
 		this.mtime = new Date().getTime();
-		this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri: gitUri }]);
+		this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri: gkUri }]);
 	}
 
 	@debounce(1100)
@@ -106,7 +107,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 		const cache = new Map<string, CacheRow>();
 
 		for (const row of this.cache.values()) {
-			const { path } = fromGitUri(row.uri);
+			const { path } = fromBkUri(row.uri);
 			const isOpen = workspace.textDocuments
 				.filter(d => d.uri.scheme === 'file')
 				.some(d => pathEquals(d.uri.fsPath, path));
@@ -128,7 +129,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 	async stat(uri: Uri): Promise<FileStat> {
 		await this.model.isInitialized;
 
-		const { submoduleOf, path, ref } = fromGitUri(uri);
+		const { submoduleOf, path, ref } = fromBkUri(uri);
 		const repository = submoduleOf ? this.model.getRepository(submoduleOf) : this.model.getRepository(uri);
 		if (!repository) {
 			throw FileSystemError.FileNotFound();
@@ -155,7 +156,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 	async readFile(uri: Uri): Promise<Uint8Array> {
 		await this.model.isInitialized;
 
-		const { path, ref, submoduleOf } = fromGitUri(uri);
+		const { path, ref, submoduleOf } = fromBkUri(uri);
 
 		if (submoduleOf) {
 			const repository = this.model.getRepository(submoduleOf);

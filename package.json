@@ -6,19 +6,2735 @@
   "engines": {
     "vscode": "^1.71.0"
   },
+  "enabledApiProposals": [
+    "diffCommand",
+    "contribEditorContentMenu",
+    "contribViewsWelcome",
+    "editSessionIdentityProvider",
+    "scmActionButton",
+    "scmSelectedProvider",
+    "scmValidation",
+    "tabInputTextMerge",
+    "timeline",
+    "contribMergeEditorMenus"
+  ],
   "categories": [
     "Other"
   ],
   "activationEvents": [
     "onCommand:bkscm.initrepo",
-    "workspaceContains:.bk"
+    "workspaceContains:.bk",
+    "onEditSession:file",
+    "onFileSystem:bk",
+    "onFileSystem:bk-show"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "bkscm.initrepo",
-        "title": "Bk: Initialize Repository"
+        "command": "bk.setLogLevel",
+        "title": "%command.setLogLevel%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.clone",
+        "title": "%command.clone%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.cloneRecursive",
+        "title": "%command.cloneRecursive%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.init",
+        "title": "%command.init%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.openRepository",
+        "title": "%command.openRepository%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.close",
+        "title": "%command.close%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.refresh",
+        "title": "%command.refresh%",
+        "category": "Bk",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "bk.openChange",
+        "title": "%command.openChange%",
+        "category": "Bk",
+        "icon": "$(compare-changes)"
+      },
+      {
+        "command": "bk.openAllChanges",
+        "title": "%command.openAllChanges%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.openFile",
+        "title": "%command.openFile%",
+        "category": "Bk",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "bk.openFile2",
+        "title": "%command.openFile%",
+        "category": "Bk",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "bk.openHEADFile",
+        "title": "%command.openHEADFile%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stage",
+        "title": "%command.stage%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.stageAll",
+        "title": "%command.stageAll%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.stageAllTracked",
+        "title": "%command.stageAllTracked%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.stageAllUntracked",
+        "title": "%command.stageAllUntracked%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.stageAllMerge",
+        "title": "%command.stageAllMerge%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.stageSelectedRanges",
+        "title": "%command.stageSelectedRanges%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.revertSelectedRanges",
+        "title": "%command.revertSelectedRanges%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stageChange",
+        "title": "%command.stageChange%",
+        "category": "Bk",
+        "icon": "$(add)"
+      },
+      {
+        "command": "bk.revertChange",
+        "title": "%command.revertChange%",
+        "category": "Bk",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "bk.unstage",
+        "title": "%command.unstage%",
+        "category": "Bk",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "bk.unstageAll",
+        "title": "%command.unstageAll%",
+        "category": "Bk",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "bk.unstageSelectedRanges",
+        "title": "%command.unstageSelectedRanges%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.clean",
+        "title": "%command.clean%",
+        "category": "Bk",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "bk.cleanAll",
+        "title": "%command.cleanAll%",
+        "category": "Bk",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "bk.cleanAllTracked",
+        "title": "%command.cleanAllTracked%",
+        "category": "Bk",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "bk.cleanAllUntracked",
+        "title": "%command.cleanAllUntracked%",
+        "category": "Bk",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "bk.rename",
+        "title": "%command.rename%",
+        "category": "Bk",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "bk.commit",
+        "title": "%command.commit%",
+        "category": "Bk",
+        "icon": "$(check)",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitStaged",
+        "title": "%command.commitStaged%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitEmpty",
+        "title": "%command.commitEmpty%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitStagedSigned",
+        "title": "%command.commitStagedSigned%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitStagedAmend",
+        "title": "%command.commitStagedAmend%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitAll",
+        "title": "%command.commitAll%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitAllSigned",
+        "title": "%command.commitAllSigned%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitAllAmend",
+        "title": "%command.commitAllAmend%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitNoVerify",
+        "title": "%command.commitNoVerify%",
+        "category": "Bk",
+        "icon": "$(check)",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitStagedNoVerify",
+        "title": "%command.commitStagedNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitEmptyNoVerify",
+        "title": "%command.commitEmptyNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitStagedSignedNoVerify",
+        "title": "%command.commitStagedSignedNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitStagedAmendNoVerify",
+        "title": "%command.commitStagedAmendNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitAllNoVerify",
+        "title": "%command.commitAllNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitAllSignedNoVerify",
+        "title": "%command.commitAllSignedNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitAllAmendNoVerify",
+        "title": "%command.commitAllAmendNoVerify%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.commitMessageAccept",
+        "title": "%command.commitMessageAccept%",
+        "icon": "$(check)",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.commitMessageDiscard",
+        "title": "%command.commitMessageDiscard%",
+        "icon": "$(discard)",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.restoreCommitTemplate",
+        "title": "%command.restoreCommitTemplate%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.undoCommit",
+        "title": "%command.undoCommit%",
+        "category": "Bk",
+        "enablement": "!commitInProgress"
+      },
+      {
+        "command": "bk.checkout",
+        "title": "%command.checkout%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.checkoutDetached",
+        "title": "%command.checkoutDetached%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.branch",
+        "title": "%command.branch%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.branchFrom",
+        "title": "%command.branchFrom%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.deleteBranch",
+        "title": "%command.deleteBranch%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.renameBranch",
+        "title": "%command.renameBranch%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.merge",
+        "title": "%command.merge%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.rebase",
+        "title": "%command.rebase%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.createTag",
+        "title": "%command.createTag%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.deleteTag",
+        "title": "%command.deleteTag%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.fetch",
+        "title": "%command.fetch%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.fetchPrune",
+        "title": "%command.fetchPrune%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.fetchAll",
+        "title": "%command.fetchAll%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pull",
+        "title": "%command.pull%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pullRebase",
+        "title": "%command.pullRebase%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pullFrom",
+        "title": "%command.pullFrom%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.push",
+        "title": "%command.push%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pushForce",
+        "title": "%command.pushForce%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pushTo",
+        "title": "%command.pushTo%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pushToForce",
+        "title": "%command.pushToForce%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pushTags",
+        "title": "%command.pushTags%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pushWithTags",
+        "title": "%command.pushFollowTags%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.pushWithTagsForce",
+        "title": "%command.pushFollowTagsForce%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.cherryPick",
+        "title": "%command.cherryPick%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.addRemote",
+        "title": "%command.addRemote%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.removeRemote",
+        "title": "%command.removeRemote%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.sync",
+        "title": "%command.sync%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.syncRebase",
+        "title": "%command.syncRebase%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.publish",
+        "title": "%command.publish%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.showOutput",
+        "title": "%command.showOutput%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.ignore",
+        "title": "%command.ignore%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.revealInExplorer",
+        "title": "%command.revealInExplorer%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.revealFileInOS.linux",
+        "title": "%command.revealFileInOS.linux%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.revealFileInOS.mac",
+        "title": "%command.revealFileInOS.mac%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.revealFileInOS.windows",
+        "title": "%command.revealFileInOS.windows%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashIncludeUntracked",
+        "title": "%command.stashIncludeUntracked%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stash",
+        "title": "%command.stash%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashPop",
+        "title": "%command.stashPop%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashPopLatest",
+        "title": "%command.stashPopLatest%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashApply",
+        "title": "%command.stashApply%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashApplyLatest",
+        "title": "%command.stashApplyLatest%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashDrop",
+        "title": "%command.stashDrop%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.stashDropAll",
+        "title": "%command.stashDropAll%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.timeline.openDiff",
+        "title": "%command.timelineOpenDiff%",
+        "icon": "$(compare-changes)",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.timeline.copyCommitId",
+        "title": "%command.timelineCopyCommitId%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.timeline.copyCommitMessage",
+        "title": "%command.timelineCopyCommitMessage%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.timeline.selectForCompare",
+        "title": "%command.timelineSelectForCompare%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.timeline.compareWithSelected",
+        "title": "%command.timelineCompareWithSelected%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.rebaseAbort",
+        "title": "%command.rebaseAbort%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.closeAllDiffEditors",
+        "title": "%command.closeAllDiffEditors%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.api.getRepositories",
+        "title": "%command.api.getRepositories%",
+        "category": "Bk API"
+      },
+      {
+        "command": "bk.api.getRepositoryState",
+        "title": "%command.api.getRepositoryState%",
+        "category": "Bk API"
+      },
+      {
+        "command": "bk.api.getRemoteSources",
+        "title": "%command.api.getRemoteSources%",
+        "category": "Bk API"
+      },
+      {
+        "command": "bk.acceptMerge",
+        "title": "%command.bk.acceptMerge%",
+        "category": "Bk",
+        "enablement": "isMergeEditor && mergeEditorResultUri in bk.mergeChanges"
+      },
+      {
+        "command": "bk.openMergeEditor",
+        "title": "%command.bk.openMergeEditor%",
+        "category": "Bk"
+      },
+      {
+        "command": "bk.runBkMerge",
+        "title": "%command.bk.runBkMerge%",
+        "category": "Bk",
+        "enablement": "isMergeEditor"
+      },
+      {
+        "command": "bk.runBkMergeDiff3",
+        "title": "%command.bk.runBkMergeDiff3%",
+        "category": "Bk",
+        "enablement": "isMergeEditor"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "bk.stageSelectedRanges",
+        "key": "ctrl+k ctrl+alt+s",
+        "mac": "cmd+k cmd+alt+s",
+        "when": "isInDiffEditor"
+      },
+      {
+        "command": "bk.unstageSelectedRanges",
+        "key": "ctrl+k ctrl+n",
+        "mac": "cmd+k cmd+n",
+        "when": "isInDiffEditor"
+      },
+      {
+        "command": "bk.revertSelectedRanges",
+        "key": "ctrl+k ctrl+r",
+        "mac": "cmd+k cmd+r",
+        "when": "isInDiffEditor"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "bk.setLogLevel",
+          "when": "config.bk.enabled && !bk.missing"
+        },
+        {
+          "command": "bk.clone",
+          "when": "config.bk.enabled && !bk.missing"
+        },
+        {
+          "command": "bk.cloneRecursive",
+          "when": "config.bk.enabled && !bk.missing"
+        },
+        {
+          "command": "bk.init",
+          "when": "config.bk.enabled && !bk.missing"
+        },
+        {
+          "command": "bk.openRepository",
+          "when": "config.bk.enabled && !bk.missing"
+        },
+        {
+          "command": "bk.close",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.refresh",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.openFile",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && resourceScheme == file && scmActiveResourceHasChanges"
+        },
+        {
+          "command": "bk.openHEADFile",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && resourceScheme == file && scmActiveResourceHasChanges"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stage",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stageAll",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stageAllTracked",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stageAllUntracked",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stageAllMerge",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stageSelectedRanges",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stageChange",
+          "when": "false"
+        },
+        {
+          "command": "bk.revertSelectedRanges",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.revertChange",
+          "when": "false"
+        },
+        {
+          "command": "bk.openFile2",
+          "when": "false"
+        },
+        {
+          "command": "bk.unstage",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.unstageAll",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.unstageSelectedRanges",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.clean",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.cleanAll",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.cleanAllTracked",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.cleanAllUntracked",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.rename",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && resourceScheme == file && scmActiveResourceRepository"
+        },
+        {
+          "command": "bk.commit",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitStaged",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitEmpty",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitStagedSigned",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitStagedAmend",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitAll",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitAllSigned",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitAllAmend",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.rebaseAbort",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && bkRebaseInProgress"
+        },
+        {
+          "command": "bk.commitNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitStagedNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitEmptyNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitStagedSignedNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitStagedAmendNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitAllNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitAllSignedNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.commitAllAmendNoVerify",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.restoreCommitTemplate",
+          "when": "false"
+        },
+        {
+          "command": "bk.commitMessageAccept",
+          "when": "false"
+        },
+        {
+          "command": "bk.commitMessageDiscard",
+          "when": "false"
+        },
+        {
+          "command": "bk.revealInExplorer",
+          "when": "false"
+        },
+        {
+          "command": "bk.revealFileInOS.linux",
+          "when": "false"
+        },
+        {
+          "command": "bk.revealFileInOS.mac",
+          "when": "false"
+        },
+        {
+          "command": "bk.revealFileInOS.windows",
+          "when": "false"
+        },
+        {
+          "command": "bk.undoCommit",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.checkout",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.branch",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.branchFrom",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.deleteBranch",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.renameBranch",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.cherryPick",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pull",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pullFrom",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pullRebase",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.merge",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.rebase",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.createTag",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.deleteTag",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.fetch",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.fetchPrune",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.fetchAll",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.push",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pushForce",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowForcePush && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pushTo",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pushToForce",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowForcePush && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pushWithTags",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pushWithTagsForce",
+          "when": "config.bk.enabled && !bk.missing && config.bk.allowForcePush && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.pushTags",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.addRemote",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.removeRemote",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.sync",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.syncRebase",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.publish",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.showOutput",
+          "when": "config.bk.enabled"
+        },
+        {
+          "command": "bk.ignore",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && resourceScheme == file && scmActiveResourceRepository"
+        },
+        {
+          "command": "bk.stashIncludeUntracked",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stash",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stashPop",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stashPopLatest",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stashApply",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stashApplyLatest",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stashDrop",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.stashDropAll",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.timeline.openDiff",
+          "when": "false"
+        },
+        {
+          "command": "bk.timeline.copyCommitId",
+          "when": "false"
+        },
+        {
+          "command": "bk.timeline.copyCommitMessage",
+          "when": "false"
+        },
+        {
+          "command": "bk.timeline.selectForCompare",
+          "when": "false"
+        },
+        {
+          "command": "bk.timeline.compareWithSelected",
+          "when": "false"
+        },
+        {
+          "command": "bk.closeAllDiffEditors",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
+        },
+        {
+          "command": "bk.api.getRepositories",
+          "when": "false"
+        },
+        {
+          "command": "bk.api.getRepositoryState",
+          "when": "false"
+        },
+        {
+          "command": "bk.api.getRemoteSources",
+          "when": "false"
+        },
+        {
+          "command": "bk.openMergeEditor",
+          "when": "false"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "bk.commit",
+          "group": "navigation",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.refresh",
+          "group": "navigation",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.pull",
+          "group": "1_header@1",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.push",
+          "group": "1_header@2",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.clone",
+          "group": "1_header@3",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.checkout",
+          "group": "1_header@4",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.fetch",
+          "group": "1_header@5",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.commit",
+          "group": "2_main@1",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.changes",
+          "group": "2_main@2",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.pullpush",
+          "group": "2_main@3",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.branch",
+          "group": "2_main@4",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.remotes",
+          "group": "2_main@5",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.stash",
+          "group": "2_main@6",
+          "when": "scmProvider == bk"
+        },
+        {
+          "submenu": "bk.tags",
+          "group": "2_main@7",
+          "when": "scmProvider == bk"
+        },
+        {
+          "command": "bk.showOutput",
+          "group": "3_footer",
+          "when": "scmProvider == bk"
+        }
+      ],
+      "scm/sourceControl": [
+        {
+          "command": "bk.close",
+          "group": "navigation",
+          "when": "scmProvider == bk"
+        }
+      ],
+      "scm/resourceGroup/context": [
+        {
+          "command": "bk.stageAllMerge",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.stageAllMerge",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.unstageAll",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.unstageAll",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.cleanAll",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges == mixed",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.stageAll",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges == mixed",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.cleanAll",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges == mixed",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stageAll",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges == mixed",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.cleanAllTracked",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges != mixed",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.stageAllTracked",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges != mixed",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.cleanAllTracked",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges != mixed",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stageAllTracked",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges != mixed",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.cleanAllUntracked",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.stageAllUntracked",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.cleanAllUntracked",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stageAllUntracked",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "inline@2"
+        }
+      ],
+      "scm/resourceFolder/context": [
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.unstage",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.unstage",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.ignore",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "1_modification@3"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.ignore",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification@3"
+        }
+      ],
+      "scm/resourceState/context": [
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.openFile",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.revealInExplorer",
+          "when": "scmProvider == bk && scmResourceGroup == merge",
+          "group": "2_view@1"
+        },
+        {
+          "command": "bk.revealFileInOS.linux",
+          "when": "scmProvider == bk && scmResourceGroup == merge && remoteName == '' && isLinux",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.revealFileInOS.mac",
+          "when": "scmProvider == bk && scmResourceGroup == merge && remoteName == '' && isMac",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.revealFileInOS.windows",
+          "when": "scmProvider == bk && scmResourceGroup == merge && remoteName == '' && isWindows",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.openFile2",
+          "when": "scmProvider == bk && scmResourceGroup == merge && config.bk.showInlineOpenFileAction && config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == merge && config.bk.showInlineOpenFileAction && !config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.openFile",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.openHEADFile",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.unstage",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.unstage",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.revealInExplorer",
+          "when": "scmProvider == bk && scmResourceGroup == index",
+          "group": "2_view@1"
+        },
+        {
+          "command": "bk.revealFileInOS.linux",
+          "when": "scmProvider == bk && scmResourceGroup == index && remoteName == '' && isLinux",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.revealFileInOS.mac",
+          "when": "scmProvider == bk && scmResourceGroup == index && remoteName == '' && isMac",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.revealFileInOS.windows",
+          "when": "scmProvider == bk && scmResourceGroup == index && remoteName == '' && isWindows",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.openFile2",
+          "when": "scmProvider == bk && scmResourceGroup == index && config.bk.showInlineOpenFileAction && config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == index && config.bk.showInlineOpenFileAction && !config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.openHEADFile",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.openFile",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.openFile2",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.showInlineOpenFileAction && config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.showInlineOpenFileAction && !config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.ignore",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "1_modification@3"
+        },
+        {
+          "command": "bk.revealInExplorer",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree",
+          "group": "2_view@1"
+        },
+        {
+          "command": "bk.revealFileInOS.linux",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && remoteName == '' && isLinux",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.revealFileInOS.mac",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && remoteName == '' && isMac",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.revealFileInOS.windows",
+          "when": "scmProvider == bk && scmResourceGroup == workingTree && remoteName == '' && isWindows",
+          "group": "2_view@2"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.openHEADFile",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.openFile",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "navigation"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == untracked && !bkFreshRepository",
+          "group": "1_modification"
+        },
+        {
+          "command": "bk.clean",
+          "when": "scmProvider == bk && scmResourceGroup == untracked && !bkFreshRepository",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.stage",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "inline@2"
+        },
+        {
+          "command": "bk.openFile2",
+          "when": "scmProvider == bk && scmResourceGroup == untracked && config.bk.showInlineOpenFileAction && config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.openChange",
+          "when": "scmProvider == bk && scmResourceGroup == untracked && config.bk.showInlineOpenFileAction && !config.bk.openDiffOnClick",
+          "group": "inline@1"
+        },
+        {
+          "command": "bk.ignore",
+          "when": "scmProvider == bk && scmResourceGroup == untracked",
+          "group": "1_modification@3"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "bk.openFile",
+          "group": "navigation",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        },
+        {
+          "command": "bk.openFile",
+          "group": "navigation",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInNotebookTextDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        },
+        {
+          "command": "bk.openChange",
+          "group": "navigation",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && !isInDiffEditor && !isMergeEditor && resourceScheme == file && scmActiveResourceHasChanges"
+        },
+        {
+          "command": "bk.commitMessageAccept",
+          "group": "navigation",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && editorLangId == bk-commit && commitInProgress"
+        },
+        {
+          "command": "bk.commitMessageDiscard",
+          "group": "navigation",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && editorLangId == bk-commit && commitInProgress"
+        },
+        {
+          "command": "bk.stageSelectedRanges",
+          "group": "2_bk@1",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        },
+        {
+          "command": "bk.unstageSelectedRanges",
+          "group": "2_bk@2",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        },
+        {
+          "command": "bk.revertSelectedRanges",
+          "group": "2_bk@3",
+          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "bk.stageSelectedRanges",
+          "group": "2_bk@1",
+          "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        },
+        {
+          "command": "bk.unstageSelectedRanges",
+          "group": "2_bk@2",
+          "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        },
+        {
+          "command": "bk.revertSelectedRanges",
+          "group": "2_bk@3",
+          "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
+        }
+      ],
+      "editor/content": [
+        {
+          "command": "bk.acceptMerge",
+          "when": "isMergeResultEditor && mergeEditorBaseUri =~ /^(bk|file):/ && mergeEditorResultUri in bk.mergeChanges"
+        },
+        {
+          "command": "bk.openMergeEditor",
+          "group": "navigation@-10",
+          "when": "config.bk.enabled && !bk.missing && !isInDiffEditor && !isMergeEditor && resource in bk.mergeChanges"
+        }
+      ],
+      "mergeEditor/result/title": [
+        {
+          "command": "bk.runBkMerge",
+          "when": "isMergeEditor"
+        },
+        {
+          "command": "bk.runBkMergeDiff3",
+          "when": "isMergeEditor"
+        }
+      ],
+      "scm/change/title": [
+        {
+          "command": "bk.stageChange",
+          "when": "config.bk.enabled && !bk.missing && originalResourceScheme == bk"
+        },
+        {
+          "command": "bk.revertChange",
+          "when": "config.bk.enabled && !bk.missing && originalResourceScheme == bk"
+        }
+      ],
+      "timeline/item/context": [
+        {
+          "command": "bk.timeline.openDiff",
+          "group": "1_actions",
+          "when": "config.bk.enabled && !bk.missing && timelineItem =~ /bk:file\\b/ && !listMultiSelection"
+        },
+        {
+          "command": "bk.timeline.compareWithSelected",
+          "group": "3_compare@1",
+          "when": "config.bk.enabled && !bk.missing && bk.timeline.selectedForCompare && timelineItem =~ /bk:file\\b/ && !listMultiSelection"
+        },
+        {
+          "command": "bk.timeline.selectForCompare",
+          "group": "3_compare@2",
+          "when": "config.bk.enabled && !bk.missing && timelineItem =~ /bk:file\\b/ && !listMultiSelection"
+        },
+        {
+          "command": "bk.timeline.copyCommitId",
+          "group": "5_copy@1",
+          "when": "config.bk.enabled && !bk.missing && timelineItem =~ /bk:file:commit\\b/ && !listMultiSelection"
+        },
+        {
+          "command": "bk.timeline.copyCommitMessage",
+          "group": "5_copy@2",
+          "when": "config.bk.enabled && !bk.missing && timelineItem =~ /bk:file:commit\\b/ && !listMultiSelection"
+        }
+      ],
+      "bk.commit": [
+        {
+          "command": "bk.commit",
+          "group": "1_commit@1"
+        },
+        {
+          "command": "bk.commitStaged",
+          "group": "1_commit@2"
+        },
+        {
+          "command": "bk.commitAll",
+          "group": "1_commit@3"
+        },
+        {
+          "command": "bk.undoCommit",
+          "group": "1_commit@4"
+        },
+        {
+          "command": "bk.rebaseAbort",
+          "group": "1_commit@5"
+        },
+        {
+          "command": "bk.commitNoVerify",
+          "group": "1_commit@6",
+          "when": "config.bk.allowNoVerifyCommit"
+        },
+        {
+          "command": "bk.commitStagedNoVerify",
+          "group": "1_commit@7",
+          "when": "config.bk.allowNoVerifyCommit"
+        },
+        {
+          "command": "bk.commitAllNoVerify",
+          "group": "1_commit@8",
+          "when": "config.bk.allowNoVerifyCommit"
+        },
+        {
+          "command": "bk.commitStagedAmend",
+          "group": "2_amend@1"
+        },
+        {
+          "command": "bk.commitAllAmend",
+          "group": "2_amend@2"
+        },
+        {
+          "command": "bk.commitStagedAmendNoVerify",
+          "group": "2_amend@3",
+          "when": "config.bk.allowNoVerifyCommit"
+        },
+        {
+          "command": "bk.commitAllAmendNoVerify",
+          "group": "2_amend@4",
+          "when": "config.bk.allowNoVerifyCommit"
+        },
+        {
+          "command": "bk.commitStagedSigned",
+          "group": "3_signoff@1"
+        },
+        {
+          "command": "bk.commitAllSigned",
+          "group": "3_signoff@2"
+        },
+        {
+          "command": "bk.commitStagedSignedNoVerify",
+          "group": "3_signoff@3",
+          "when": "config.bk.allowNoVerifyCommit"
+        },
+        {
+          "command": "bk.commitAllSignedNoVerify",
+          "group": "3_signoff@4",
+          "when": "config.bk.allowNoVerifyCommit"
+        }
+      ],
+      "bk.changes": [
+        {
+          "command": "bk.stageAll",
+          "group": "changes@1"
+        },
+        {
+          "command": "bk.unstageAll",
+          "group": "changes@2"
+        },
+        {
+          "command": "bk.cleanAll",
+          "group": "changes@3"
+        }
+      ],
+      "bk.pullpush": [
+        {
+          "command": "bk.sync",
+          "group": "1_sync@1"
+        },
+        {
+          "command": "bk.syncRebase",
+          "when": "bkState == idle",
+          "group": "1_sync@2"
+        },
+        {
+          "command": "bk.pull",
+          "group": "2_pull@1"
+        },
+        {
+          "command": "bk.pullRebase",
+          "group": "2_pull@2"
+        },
+        {
+          "command": "bk.pullFrom",
+          "group": "2_pull@3"
+        },
+        {
+          "command": "bk.push",
+          "group": "3_push@1"
+        },
+        {
+          "command": "bk.pushForce",
+          "when": "config.bk.allowForcePush",
+          "group": "3_push@2"
+        },
+        {
+          "command": "bk.pushTo",
+          "group": "3_push@3"
+        },
+        {
+          "command": "bk.pushToForce",
+          "when": "config.bk.allowForcePush",
+          "group": "3_push@4"
+        },
+        {
+          "command": "bk.fetch",
+          "group": "4_fetch@1"
+        },
+        {
+          "command": "bk.fetchPrune",
+          "group": "4_fetch@2"
+        },
+        {
+          "command": "bk.fetchAll",
+          "group": "4_fetch@3"
+        }
+      ],
+      "bk.branch": [
+        {
+          "command": "bk.merge",
+          "group": "branch@1"
+        },
+        {
+          "command": "bk.rebase",
+          "group": "branch@2"
+        },
+        {
+          "command": "bk.branch",
+          "group": "branch@3"
+        },
+        {
+          "command": "bk.branchFrom",
+          "group": "branch@4"
+        },
+        {
+          "command": "bk.renameBranch",
+          "group": "branch@5"
+        },
+        {
+          "command": "bk.deleteBranch",
+          "group": "branch@6"
+        },
+        {
+          "command": "bk.publish",
+          "group": "branch@7"
+        }
+      ],
+      "bk.remotes": [
+        {
+          "command": "bk.addRemote",
+          "group": "remote@1"
+        },
+        {
+          "command": "bk.removeRemote",
+          "group": "remote@2"
+        }
+      ],
+      "bk.stash": [
+        {
+          "command": "bk.stash",
+          "group": "stash@1"
+        },
+        {
+          "command": "bk.stashIncludeUntracked",
+          "group": "stash@2"
+        },
+        {
+          "command": "bk.stashApplyLatest",
+          "group": "stash@3"
+        },
+        {
+          "command": "bk.stashApply",
+          "group": "stash@4"
+        },
+        {
+          "command": "bk.stashPopLatest",
+          "group": "stash@5"
+        },
+        {
+          "command": "bk.stashPop",
+          "group": "stash@6"
+        },
+        {
+          "command": "bk.stashDrop",
+          "group": "stash@7"
+        },
+        {
+          "command": "bk.stashDropAll",
+          "group": "stash@8"
+        }
+      ],
+      "bk.tags": [
+        {
+          "command": "bk.createTag",
+          "group": "tags@1"
+        },
+        {
+          "command": "bk.deleteTag",
+          "group": "tags@2"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "bk.commit",
+        "label": "%submenu.commit%"
+      },
+      {
+        "id": "bk.changes",
+        "label": "%submenu.changes%"
+      },
+      {
+        "id": "bk.pullpush",
+        "label": "%submenu.pullpush%"
+      },
+      {
+        "id": "bk.branch",
+        "label": "%submenu.branch%"
+      },
+      {
+        "id": "bk.remotes",
+        "label": "%submenu.remotes%"
+      },
+      {
+        "id": "bk.stash",
+        "label": "%submenu.stash%"
+      },
+      {
+        "id": "bk.tags",
+        "label": "%submenu.tags%"
+      }
+    ],
+    "configuration": {
+      "title": "Bk",
+      "properties": {
+        "bk.enabled": {
+          "type": "boolean",
+          "scope": "resource",
+          "description": "%config.enabled%",
+          "default": true
+        },
+        "bk.path": {
+          "type": [
+            "string",
+            "null",
+            "array"
+          ],
+          "markdownDescription": "%config.path%",
+          "default": null,
+          "scope": "machine"
+        },
+        "bk.autoRepositoryDetection": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            false,
+            "subFolders",
+            "openEditors"
+          ],
+          "enumDescriptions": [
+            "%config.autoRepositoryDetection.true%",
+            "%config.autoRepositoryDetection.false%",
+            "%config.autoRepositoryDetection.subFolders%",
+            "%config.autoRepositoryDetection.openEditors%"
+          ],
+          "description": "%config.autoRepositoryDetection%",
+          "default": true
+        },
+        "bk.autorefresh": {
+          "type": "boolean",
+          "description": "%config.autorefresh%",
+          "default": true
+        },
+        "bk.autofetch": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            false,
+            "all"
+          ],
+          "scope": "resource",
+          "markdownDescription": "%config.autofetch%",
+          "default": false,
+          "tags": [
+            "usesOnlineServices"
+          ]
+        },
+        "bk.autofetchPeriod": {
+          "type": "number",
+          "scope": "resource",
+          "markdownDescription": "%config.autofetchPeriod%",
+          "default": 180
+        },
+        "bk.branchPrefix": {
+          "type": "string",
+          "description": "%config.branchPrefix%",
+          "default": "",
+          "scope": "resource"
+        },
+        "bk.branchProtection": {
+          "type": "array",
+          "markdownDescription": "%config.branchProtection%",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "resource"
+        },
+        "bk.branchProtectionPrompt": {
+          "type": "string",
+          "description": "%config.branchProtectionPrompt%",
+          "enum": [
+            "alwaysCommit",
+            "alwaysCommitToNewBranch",
+            "alwaysPrompt"
+          ],
+          "enumDescriptions": [
+            "%config.branchProtectionPrompt.alwaysCommit%",
+            "%config.branchProtectionPrompt.alwaysCommitToNewBranch%",
+            "%config.branchProtectionPrompt.alwaysPrompt%"
+          ],
+          "default": "alwaysPrompt",
+          "scope": "resource"
+        },
+        "bk.branchValidationRegex": {
+          "type": "string",
+          "description": "%config.branchValidationRegex%",
+          "default": ""
+        },
+        "bk.branchWhitespaceChar": {
+          "type": "string",
+          "description": "%config.branchWhitespaceChar%",
+          "default": "-"
+        },
+        "bk.branchRandomName.enable": {
+          "type": "boolean",
+          "description": "%config.branchRandomNameEnable%",
+          "default": false,
+          "scope": "resource"
+        },
+        "bk.branchRandomName.dictionary": {
+          "type": "array",
+          "markdownDescription": "%config.branchRandomNameDictionary%",
+          "items": {
+            "type": "string",
+            "enum": [
+              "adjectives",
+              "animals",
+              "colors",
+              "numbers"
+            ],
+            "enumDescriptions": [
+              "%config.branchRandomNameDictionary.adjectives%",
+              "%config.branchRandomNameDictionary.animals%",
+              "%config.branchRandomNameDictionary.colors%",
+              "%config.branchRandomNameDictionary.numbers%"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 5,
+          "default": [
+            "adjectives",
+            "animals"
+          ],
+          "scope": "resource"
+        },
+        "bk.confirmSync": {
+          "type": "boolean",
+          "description": "%config.confirmSync%",
+          "default": true
+        },
+        "bk.countBadge": {
+          "type": "string",
+          "enum": [
+            "all",
+            "tracked",
+            "off"
+          ],
+          "enumDescriptions": [
+            "%config.countBadge.all%",
+            "%config.countBadge.tracked%",
+            "%config.countBadge.off%"
+          ],
+          "description": "%config.countBadge%",
+          "default": "all",
+          "scope": "resource"
+        },
+        "bk.checkoutType": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "local",
+              "tags",
+              "remote"
+            ],
+            "enumDescriptions": [
+              "%config.checkoutType.local%",
+              "%config.checkoutType.tags%",
+              "%config.checkoutType.remote%"
+            ]
+          },
+          "uniqueItems": true,
+          "markdownDescription": "%config.checkoutType%",
+          "default": [
+            "local",
+            "remote",
+            "tags"
+          ]
+        },
+        "bk.ignoreLegacyWarning": {
+          "type": "boolean",
+          "description": "%config.ignoreLegacyWarning%",
+          "default": false
+        },
+        "bk.ignoreMissingBkWarning": {
+          "type": "boolean",
+          "description": "%config.ignoreMissingBkWarning%",
+          "default": false
+        },
+        "bk.ignoreWindowsBk27Warning": {
+          "type": "boolean",
+          "description": "%config.ignoreWindowsBk27Warning%",
+          "default": false
+        },
+        "bk.ignoreLimitWarning": {
+          "type": "boolean",
+          "description": "%config.ignoreLimitWarning%",
+          "default": false
+        },
+        "bk.ignoreRebaseWarning": {
+          "type": "boolean",
+          "description": "%config.ignoreRebaseWarning%",
+          "default": false
+        },
+        "bk.defaultCloneDirectory": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "scope": "machine",
+          "description": "%config.defaultCloneDirectory%"
+        },
+        "bk.useEditorAsCommitInput": {
+          "type": "boolean",
+          "description": "%config.useEditorAsCommitInput%",
+          "default": true
+        },
+        "bk.verboseCommit": {
+          "type": "boolean",
+          "scope": "resource",
+          "markdownDescription": "%config.verboseCommit%",
+          "default": false
+        },
+        "bk.enableSmartCommit": {
+          "type": "boolean",
+          "scope": "resource",
+          "description": "%config.enableSmartCommit%",
+          "default": false
+        },
+        "bk.smartCommitChanges": {
+          "type": "string",
+          "enum": [
+            "all",
+            "tracked"
+          ],
+          "enumDescriptions": [
+            "%config.smartCommitChanges.all%",
+            "%config.smartCommitChanges.tracked%"
+          ],
+          "scope": "resource",
+          "description": "%config.smartCommitChanges%",
+          "default": "all"
+        },
+        "bk.suggestSmartCommit": {
+          "type": "boolean",
+          "scope": "resource",
+          "description": "%config.suggestSmartCommit%",
+          "default": true
+        },
+        "bk.enableCommitSigning": {
+          "type": "boolean",
+          "scope": "resource",
+          "description": "%config.enableCommitSigning%",
+          "default": false
+        },
+        "bk.confirmEmptyCommits": {
+          "type": "boolean",
+          "scope": "resource",
+          "description": "%config.confirmEmptyCommits%",
+          "default": true
+        },
+        "bk.decorations.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.decorations.enabled%"
+        },
+        "bk.enableStatusBarSync": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.enableStatusBarSync%",
+          "scope": "resource"
+        },
+        "bk.followTagsWhenSync": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.followTagsWhenSync%"
+        },
+        "bk.promptToSaveFilesBeforeStash": {
+          "type": "string",
+          "enum": [
+            "always",
+            "staged",
+            "never"
+          ],
+          "enumDescriptions": [
+            "%config.promptToSaveFilesBeforeStash.always%",
+            "%config.promptToSaveFilesBeforeStash.staged%",
+            "%config.promptToSaveFilesBeforeStash.never%"
+          ],
+          "scope": "resource",
+          "default": "always",
+          "description": "%config.promptToSaveFilesBeforeStash%"
+        },
+        "bk.promptToSaveFilesBeforeCommit": {
+          "type": "string",
+          "enum": [
+            "always",
+            "staged",
+            "never"
+          ],
+          "enumDescriptions": [
+            "%config.promptToSaveFilesBeforeCommit.always%",
+            "%config.promptToSaveFilesBeforeCommit.staged%",
+            "%config.promptToSaveFilesBeforeCommit.never%"
+          ],
+          "scope": "resource",
+          "default": "always",
+          "description": "%config.promptToSaveFilesBeforeCommit%"
+        },
+        "bk.postCommitCommand": {
+          "type": "string",
+          "enum": [
+            "none",
+            "push",
+            "sync"
+          ],
+          "enumDescriptions": [
+            "%config.postCommitCommand.none%",
+            "%config.postCommitCommand.push%",
+            "%config.postCommitCommand.sync%"
+          ],
+          "markdownDescription": "%config.postCommitCommand%",
+          "scope": "resource",
+          "default": "none"
+        },
+        "bk.rememberPostCommitCommand": {
+          "type": "boolean",
+          "description": "%config.rememberPostCommitCommand%",
+          "scope": "resource",
+          "default": false
+        },
+        "bk.openAfterClone": {
+          "type": "string",
+          "enum": [
+            "always",
+            "alwaysNewWindow",
+            "whenNoFolderOpen",
+            "prompt"
+          ],
+          "enumDescriptions": [
+            "%config.openAfterClone.always%",
+            "%config.openAfterClone.alwaysNewWindow%",
+            "%config.openAfterClone.whenNoFolderOpen%",
+            "%config.openAfterClone.prompt%"
+          ],
+          "default": "prompt",
+          "description": "%config.openAfterClone%"
+        },
+        "bk.showInlineOpenFileAction": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.showInlineOpenFileAction%"
+        },
+        "bk.showPushSuccessNotification": {
+          "type": "boolean",
+          "description": "%config.showPushSuccessNotification%",
+          "default": false
+        },
+        "bk.inputValidation": {
+          "type": "string",
+          "enum": [
+            "always",
+            "warn",
+            "off"
+          ],
+          "default": "warn",
+          "description": "%config.inputValidation%"
+        },
+        "bk.inputValidationLength": {
+          "type": "number",
+          "default": 72,
+          "description": "%config.inputValidationLength%"
+        },
+        "bk.inputValidationSubjectLength": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "default": 50,
+          "description": "%config.inputValidationSubjectLength%"
+        },
+        "bk.detectSubmodules": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": true,
+          "description": "%config.detectSubmodules%"
+        },
+        "bk.detectSubmodulesLimit": {
+          "type": "number",
+          "scope": "resource",
+          "default": 10,
+          "description": "%config.detectSubmodulesLimit%"
+        },
+        "bk.alwaysShowStagedChangesResourceGroup": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.alwaysShowStagedChangesResourceGroup%"
+        },
+        "bk.alwaysSignOff": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.alwaysSignOff%"
+        },
+        "bk.ignoreSubmodules": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.ignoreSubmodules%"
+        },
+        "bk.ignoredRepositories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "window",
+          "description": "%config.ignoredRepositories%"
+        },
+        "bk.scanRepositories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "resource",
+          "description": "%config.scanRepositories%"
+        },
+        "bk.showProgress": {
+          "type": "boolean",
+          "description": "%config.showProgress%",
+          "default": true,
+          "scope": "resource"
+        },
+        "bk.rebaseWhenSync": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.rebaseWhenSync%"
+        },
+        "bk.fetchOnPull": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.fetchOnPull%"
+        },
+        "bk.pruneOnFetch": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.pruneOnFetch%"
+        },
+        "bk.pullTags": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": true,
+          "description": "%config.pullTags%"
+        },
+        "bk.autoStash": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.autoStash%"
+        },
+        "bk.allowForcePush": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.allowForcePush%"
+        },
+        "bk.useForcePushWithLease": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.useForcePushWithLease%"
+        },
+        "bk.confirmForcePush": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.confirmForcePush%"
+        },
+        "bk.allowNoVerifyCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.allowNoVerifyCommit%"
+        },
+        "bk.confirmNoVerifyCommit": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.confirmNoVerifyCommit%"
+        },
+        "bk.closeDiffOnOperation": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.closeDiffOnOperation%"
+        },
+        "bk.openDiffOnClick": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": true,
+          "description": "%config.openDiffOnClick%"
+        },
+        "bk.supportCancellation": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.supportCancellation%"
+        },
+        "bk.branchSortOrder": {
+          "type": "string",
+          "enum": [
+            "committerdate",
+            "alphabetically"
+          ],
+          "default": "committerdate",
+          "description": "%config.branchSortOrder%"
+        },
+        "bk.untrackedChanges": {
+          "type": "string",
+          "enum": [
+            "mixed",
+            "separate",
+            "hidden"
+          ],
+          "enumDescriptions": [
+            "%config.untrackedChanges.mixed%",
+            "%config.untrackedChanges.separate%",
+            "%config.untrackedChanges.hidden%"
+          ],
+          "default": "mixed",
+          "description": "%config.untrackedChanges%",
+          "scope": "resource"
+        },
+        "bk.requireBkUserConfig": {
+          "type": "boolean",
+          "description": "%config.requireBkUserConfig%",
+          "default": true,
+          "scope": "resource"
+        },
+        "bk.showCommitInput": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": true,
+          "description": "%config.showCommitInput%"
+        },
+        "bk.terminalAuthentication": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.terminalAuthentication%"
+        },
+        "bk.terminalBkEditor": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.terminalBkEditor%"
+        },
+        "bk.useCommitInputAsStashMessage": {
+          "type": "boolean",
+          "scope": "resource",
+          "default": false,
+          "description": "%config.useCommitInputAsStashMessage%"
+        },
+        "bk.useIntegratedAskPass": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.useIntegratedAskPass%"
+        },
+        "bk.bkhubAuthentication": {
+          "deprecationMessage": "This setting is now deprecated, please use `bkhub.bkAuthentication` instead."
+        },
+        "bk.timeline.date": {
+          "type": "string",
+          "enum": [
+            "committed",
+            "authored"
+          ],
+          "enumDescriptions": [
+            "%config.timeline.date.committed%",
+            "%config.timeline.date.authored%"
+          ],
+          "default": "committed",
+          "description": "%config.timeline.date%",
+          "scope": "window"
+        },
+        "bk.timeline.showAuthor": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.timeline.showAuthor%",
+          "scope": "window"
+        },
+        "bk.timeline.showUncommitted": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.timeline.showUncommitted%",
+          "scope": "window"
+        },
+        "bk.showActionButton": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "%config.showActionButton%",
+          "properties": {
+            "commit": {
+              "type": "boolean",
+              "description": "%config.showActionButton.commit%"
+            },
+            "publish": {
+              "type": "boolean",
+              "description": "%config.showActionButton.publish%"
+            },
+            "sync": {
+              "type": "boolean",
+              "description": "%config.showActionButton.sync%"
+            }
+          },
+          "default": {
+            "commit": true,
+            "publish": true,
+            "sync": true
+          },
+          "scope": "resource"
+        },
+        "bk.statusLimit": {
+          "type": "number",
+          "scope": "resource",
+          "default": 10000,
+          "description": "%config.statusLimit%"
+        },
+        "bk.repositoryScanIgnoredFolders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "node_modules"
+          ],
+          "scope": "resource",
+          "markdownDescription": "%config.repositoryScanIgnoredFolders%"
+        },
+        "bk.repositoryScanMaxDepth": {
+          "type": "number",
+          "scope": "resource",
+          "default": 1,
+          "markdownDescription": "%config.repositoryScanMaxDepth%"
+        },
+        "bk.commandsToLog": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "%config.commandsToLog%"
+        },
+        "bk.logLevel": {
+          "type": "string",
+          "default": "Info",
+          "enum": [
+            "Trace",
+            "Debug",
+            "Info",
+            "Warning",
+            "Error",
+            "Critical",
+            "Off"
+          ],
+          "enumDescriptions": [
+            "%config.logLevel.trace%",
+            "%config.logLevel.debug%",
+            "%config.logLevel.info%",
+            "%config.logLevel.warn%",
+            "%config.logLevel.error%",
+            "%config.logLevel.critical%",
+            "%config.logLevel.off%"
+          ],
+          "markdownDescription": "%config.logLevel%",
+          "scope": "window"
+        },
+        "bk.mergeEditor": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%config.mergeEditor%",
+          "scope": "window"
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "bkDecoration.addedResourceForeground",
+        "description": "%colors.added%",
+        "defaults": {
+          "light": "#587c0c",
+          "dark": "#81b88b",
+          "highContrast": "#a1e3ad",
+          "highContrastLight": "#374e06"
+        }
+      },
+      {
+        "id": "bkDecoration.modifiedResourceForeground",
+        "description": "%colors.modified%",
+        "defaults": {
+          "light": "#895503",
+          "dark": "#E2C08D",
+          "highContrast": "#E2C08D",
+          "highContrastLight": "#895503"
+        }
+      },
+      {
+        "id": "bkDecoration.deletedResourceForeground",
+        "description": "%colors.deleted%",
+        "defaults": {
+          "light": "#ad0707",
+          "dark": "#c74e39",
+          "highContrast": "#c74e39",
+          "highContrastLight": "#ad0707"
+        }
+      },
+      {
+        "id": "bkDecoration.renamedResourceForeground",
+        "description": "%colors.renamed%",
+        "defaults": {
+          "light": "#007100",
+          "dark": "#73C991",
+          "highContrast": "#73C991",
+          "highContrastLight": "#007100"
+        }
+      },
+      {
+        "id": "bkDecoration.untrackedResourceForeground",
+        "description": "%colors.untracked%",
+        "defaults": {
+          "light": "#007100",
+          "dark": "#73C991",
+          "highContrast": "#73C991",
+          "highContrastLight": "#007100"
+        }
+      },
+      {
+        "id": "bkDecoration.ignoredResourceForeground",
+        "description": "%colors.ignored%",
+        "defaults": {
+          "light": "#8E8E90",
+          "dark": "#8C8C8C",
+          "highContrast": "#A7A8A9",
+          "highContrastLight": "#8e8e90"
+        }
+      },
+      {
+        "id": "bkDecoration.stageModifiedResourceForeground",
+        "description": "%colors.stageModified%",
+        "defaults": {
+          "light": "#895503",
+          "dark": "#E2C08D",
+          "highContrast": "#E2C08D",
+          "highContrastLight": "#895503"
+        }
+      },
+      {
+        "id": "bkDecoration.stageDeletedResourceForeground",
+        "description": "%colors.stageDeleted%",
+        "defaults": {
+          "light": "#ad0707",
+          "dark": "#c74e39",
+          "highContrast": "#c74e39",
+          "highContrastLight": "#ad0707"
+        }
+      },
+      {
+        "id": "bkDecoration.conflictingResourceForeground",
+        "description": "%colors.conflict%",
+        "defaults": {
+          "light": "#ad0707",
+          "dark": "#e4676b",
+          "highContrast": "#c74e39",
+          "highContrastLight": "#ad0707"
+        }
+      },
+      {
+        "id": "bkDecoration.submoduleResourceForeground",
+        "description": "%colors.submodule%",
+        "defaults": {
+          "light": "#1258a7",
+          "dark": "#8db9e2",
+          "highContrast": "#8db9e2",
+          "highContrastLight": "#1258a7"
+        }
+      }
+    ],
+    "configurationDefaults": {
+      "[bk-commit]": {
+        "editor.rulers": [
+          72
+        ],
+        "workbench.editor.restoreViewState": false
+      },
+      "[bk-rebase]": {
+        "workbench.editor.restoreViewState": false
+      }
+    },
+    "viewsWelcome": [
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.disabled%",
+        "when": "!config.bk.enabled"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.missing%",
+        "when": "config.bk.enabled && bk.missing"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.missing.mac%",
+        "when": "config.bk.enabled && bk.missing && isMac"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.missing.windows%",
+        "when": "config.bk.enabled && bk.missing && isWindows"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.missing.linux%",
+        "when": "config.bk.enabled && bk.missing && isLinux"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.empty%",
+        "when": "config.bk.enabled && !bk.missing && workbenchState == empty",
+        "enablement": "bk.state == initialized",
+        "group": "2_open@1"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.folder%",
+        "when": "config.bk.enabled && !bk.missing && workbenchState == folder",
+        "enablement": "bk.state == initialized",
+        "group": "5_scm@1"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.workspace%",
+        "when": "config.bk.enabled && !bk.missing && workbenchState == workspace && workspaceFolderCount != 0",
+        "enablement": "bk.state == initialized",
+        "group": "5_scm@1"
+      },
+      {
+        "view": "scm",
+        "contents": "%view.workbench.scm.emptyWorkspace%",
+        "when": "config.bk.enabled && !bk.missing && workbenchState == workspace && workspaceFolderCount == 0",
+        "enablement": "bk.state == initialized",
+        "group": "2_open@1"
+      },
+      {
+        "view": "explorer",
+        "contents": "%view.workbench.cloneRepository%",
+        "when": "config.bk.enabled",
+        "enablement": "bk.state == initialized",
+        "group": "5_scm@1"
+      },
+      {
+        "view": "explorer",
+        "contents": "%view.workbench.learnMore%",
+        "when": "config.bk.enabled",
+        "enablement": "bk.state == initialized",
+        "group": "5_scm@10"
       }
     ]
   },
@@ -31,16 +2747,30 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.71.0",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
-    "@types/node": "16.x",
+    "@types/node": "^16.11.57",
+    "@types/vscode": "^1.71.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/iconv-lite-umd": "^0.7.0",
+    "@vscode/test-electron": "^2.1.5",
     "eslint": "^8.20.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
     "typescript": "^4.7.4",
-    "@vscode/test-electron": "^2.1.5"
+    "vscode-nls": "^5.2.0"
+  },
+  "dependencies": {
+    "@joaomoreno/unique-names-generator": "^5.0.0",
+    "@types/byline": "^4.2.33",
+    "@types/file-type": "^10.9.1",
+    "@types/picomatch": "^2.3.0",
+    "@types/which": "^2.0.1",
+    "byline": "^5.0.0",
+    "file-type": "^16.5.4",
+    "jschardet": "^3.0.0",
+    "picomatch": "^2.3.1",
+    "which": "^2.0.2"
   }
 }
