@@ -60,18 +60,18 @@ class CheckoutRemoteHeadItem extends CheckoutItem {
 		return localize('remote branch at', "Remote branch at {0}", this.shortCommit);
 	}
 
-	override async run(opts?: { detached?: boolean }): Promise<void> {
+	override async run(_opts?: { detached?: boolean }): Promise<void> {
 		if (!this.ref.name) {
 			return;
 		}
 
-		const branches = await this.repository.findTrackingBranches(this.ref.name);
+		// const branches = await this.repository.findTrackingBranches(this.ref.name);
 
-		if (branches.length > 0) {
-			await this.repository.checkout(branches[0].name!, opts);
-		} else {
-			await this.repository.checkoutTracking(this.ref.name, opts);
-		}
+		// if (branches.length > 0) {
+		// 	await this.repository.checkout(branches[0].name!, opts);
+		// } else {
+		// 	await this.repository.checkoutTracking(this.ref.name, opts);
+		// }
 	}
 }
 

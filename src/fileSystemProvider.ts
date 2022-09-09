@@ -158,21 +158,21 @@ export class BkFileSystemProvider implements FileSystemProvider {
 
 		const { path, ref, submoduleOf } = fromBkUri(uri);
 
-		if (submoduleOf) {
-			const repository = this.model.getRepository(submoduleOf);
+		// if (submoduleOf) {
+		// 	const repository = this.model.getRepository(submoduleOf);
 
-			if (!repository) {
-				throw FileSystemError.FileNotFound();
-			}
+		// 	if (!repository) {
+		// 		throw FileSystemError.FileNotFound();
+		// 	}
 
-			const encoder = new TextEncoder();
+		// 	const encoder = new TextEncoder();
 
-			if (ref === 'index') {
-				return encoder.encode(await repository.diffIndexWithHEAD(path));
-			} else {
-				return encoder.encode(await repository.diffWithHEAD(path));
-			}
-		}
+		// 	if (ref === 'index') {
+		// 		return encoder.encode(await repository.diffIndexWithHEAD(path));
+		// 	} else {
+		// 		return encoder.encode(await repository.diffWithHEAD(path));
+		// 	}
+		// }
 
 		const repository = this.model.getRepository(uri);
 

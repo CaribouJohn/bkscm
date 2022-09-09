@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as picomatch from 'picomatch';
 import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox,  SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands, Tab, TabInputTextDiff, TabInputNotebookDiff, RelativePattern } from 'vscode';
 import * as nls from 'vscode-nls';
-import { Branch, Change, ForcePushMode, BkErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/bk';
+import { Branch, Change, ForcePushMode, BkErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, FetchOptions } from './api/bk';
 // import { AutoFetcher } from './autofetch';
 import { debounce, memoize, throttle } from './decorators';
 import { Commit, BkError, Repository as BaseRepository, Stash, LogFileOptions } from './bitkeeper';
@@ -1109,7 +1109,8 @@ export class Repository implements Disposable {
 			return commitMessage;
 		}
 
-		return await this.repository.getCommitTemplate();
+		//return await this.repository.getCommitTemplate();
+		return "";
 	}
 
 	getConfigs(): Promise<{ key: string; value: string }[]> {
@@ -1348,13 +1349,13 @@ export class Repository implements Disposable {
 		await this.run(Operation.Move, () => this.repository.move(from, to));
 	}
 
-	async getBranch(name: string): Promise<Branch> {
-		return await this.run(Operation.GetBranch, () => this.repository.getBranch(name));
-	}
+	// async getBranch(name: string): Promise<Branch> {
+	// 	return await this.run(Operation.GetBranch, () => this.repository.getBranch(name));
+	// }
 
-	async getBranches(query: BranchQuery): Promise<Ref[]> {
-		return await this.run(Operation.GetBranches, () => this.repository.getBranches(query));
-	}
+	// async getBranches(query: BranchQuery): Promise<Ref[]> {
+	// 	return await this.run(Operation.GetBranches, () => this.repository.getBranches(query));
+	// }
 
 	async setBranchUpstream(name: string, upstream: string): Promise<void> {
 		await this.run(Operation.SetBranchUpstream, () => this.repository.setBranchUpstream(name, upstream));
@@ -1384,9 +1385,9 @@ export class Repository implements Disposable {
 		await this.run(Operation.CheckoutTracking, () => this.repository.checkout(treeish, [], { ...opts, track: true }));
 	}
 
-	async findTrackingBranches(upstreamRef: string): Promise<Branch[]> {
-		return await this.run(Operation.FindTrackingBranches, () => this.repository.findTrackingBranches(upstreamRef));
-	}
+	// async findTrackingBranches(upstreamRef: string): Promise<Branch[]> {
+	// 	return await this.run(Operation.FindTrackingBranches, () => this.repository.findTrackingBranches(upstreamRef));
+	// }
 
 	async getCommit(ref: string): Promise<Commit> {
 		return await this.repository.getCommit(ref);
@@ -1693,7 +1694,8 @@ export class Repository implements Disposable {
 	}
 
 	async getCommitTemplate(): Promise<string> {
-		return await this.run(Operation.GetCommitTemplate, async () => this.repository.getCommitTemplate());
+		//return await this.run(Operation.GetCommitTemplate, async () => this.repository.getCommitTemplate());
+		return "";
 	}
 
 	async ignore(files: Uri[]): Promise<void> {
@@ -1974,13 +1976,13 @@ export class Repository implements Disposable {
 		try {
 			HEAD = await this.repository.getHEAD();
 
-			if (HEAD.name) {
-				try {
-					HEAD = await this.repository.getBranch(HEAD.name);
-				} catch (err:any) {
-					// noop
-				}
-			}
+			// if (HEAD.name) {
+			// 	try {
+			// 		HEAD = await this.repository.getBranch(HEAD.name);
+			// 	} catch (err:any) {
+			// 		// noop
+			// 	}
+			// }
 		} catch (err:any) {
 			// noop
 		}
@@ -1989,10 +1991,10 @@ export class Repository implements Disposable {
 		if (sort !== 'alphabetically' && sort !== 'committerdate') {
 			sort = 'alphabetically';
 		}
-		const [refs] = await Promise.all([this.repository.getRefs({ sort })]);//,  this.repository.getSubmodules(), this.getRebaseCommit()]);
+		// const [refs] = await Promise.all([this.repository.getRefs({ sort })]);//,  this.repository.getSubmodules(), this.getRebaseCommit()]);
 
 		this._HEAD = HEAD;
-		this._refs = refs!;
+		//this._refs = refs!;
 		// this._remotes = remotes!;
 		// this._submodules = submodules!;
 		// this.rebaseCommit = rebaseCommit;
@@ -2023,40 +2025,51 @@ export class Repository implements Disposable {
 		
 		status.forEach(raw => {
 			const uri = Uri.file(path.join(this.repository.root, raw.path));
-			const renameUri = raw.rename
-				? Uri.file(path.join(this.repository.root, raw.rename))
-				: undefined;
+			// const renameUri = raw.rename
+			// 	? Uri.file(path.join(this.repository.root, raw.rename))
+			// 	: undefined;
 
-			
-			
-			switch (raw.bitkeeper) {
-				case 'x------': switch (untrackedChanges) {
-					case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
-					case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.UNTRACKED, useIcons));
-					default: return undefined;
+			let lhs = raw.bitkeeper.substring(0, 3);
+			let rhs = raw.bitkeeper.substring(3, 6);
+			//let _remainder = raw.bitkeeper.substring(6);
+
+			if (lhs !== "x--") {
+				if (lhs === "slc" || lhs === "sl-" || rhs === "p--" || rhs === 'pG-') {
+					return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons));
 				}
-				case 'DD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_DELETED, useIcons));
-				case 'AU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_US, useIcons));
-				case 'UD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.DELETED_BY_THEM, useIcons));
-				case 'UA': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_THEM, useIcons));
-				case 'DU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.DELETED_BY_US, useIcons));
-				case 'AA': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_ADDED, useIcons));
-				case 'UU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_MODIFIED, useIcons));
+			} else {
+				return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
 			}
 
-			switch (raw.bitkeeper) {
-				case 'M': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_MODIFIED, useIcons)); break;
-				case 'A': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_ADDED, useIcons)); break;
-				case 'D': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_DELETED, useIcons)); break;
-				case 'R': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_RENAMED, useIcons, renameUri)); break;
-				case 'C': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_COPIED, useIcons, renameUri)); break;
-			}
+			// switch (x + y) {
+			// 	case '??': switch (untrackedChanges) {
+			// 		// case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
+			// 		// case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.UNTRACKED, useIcons));
+			// 		// default: return undefined;
+			// 		default: 
+			// 	}
+			// 	case 'DD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_DELETED, useIcons));
+			// 	case 'AU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_US, useIcons));
+			// 	case 'UD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.DELETED_BY_THEM, useIcons));
+			// 	case 'UA': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_THEM, useIcons));
+			// 	case 'DU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.DELETED_BY_US, useIcons));
+			// 	case 'AA': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_ADDED, useIcons));
+			// 	case 'UU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_MODIFIED, useIcons));
+			// }
 
-			switch (raw.bitkeeper) {
-				case 'M': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons, renameUri)); break;
-				case 'D': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.DELETED, useIcons, renameUri)); break;
-				case 'A': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.INTENT_TO_ADD, useIcons, renameUri)); break;
-			}
+			// switch (x) {
+			// 	case 'M': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_MODIFIED, useIcons)); break;
+			// 	case 'A': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_ADDED, useIcons)); break;
+			// 	case 'D': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_DELETED, useIcons)); break;
+			// 	case 'R': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_RENAMED, useIcons, renameUri)); break;
+			// 	case 'C': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_COPIED, useIcons, renameUri)); break;
+			// }
+
+			// switch (y) {
+			// 	case 'M': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons, renameUri)); break;
+			// 	case 'D': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.DELETED, useIcons, renameUri)); break;
+			// 	case 'A': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.INTENT_TO_ADD, useIcons, renameUri)); break;
+			// }
 
 			return undefined;
 		});

@@ -6,7 +6,7 @@
 
 import { Model } from '../model';
 import { Repository as BaseRepository, Resource } from '../repository';
-import { InputBox, Bk, API, Repository, Remote, RepositoryState, Branch, ForcePushMode, Ref, Commit, Change, RepositoryUIState, Status, LogOptions, APIState, CommitOptions, RefType, CredentialsProvider, BranchQuery, PushErrorHandler, PublishEvent, FetchOptions, RemoteSourceProvider, RemoteSourcePublisher, PostCommitCommandsProvider } from './bk';
+import { InputBox, Bk, API, Repository, Remote, RepositoryState, Branch, ForcePushMode, Ref, Commit, Change, RepositoryUIState, Status, LogOptions, APIState, CommitOptions, RefType, CredentialsProvider, PushErrorHandler, PublishEvent, FetchOptions, RemoteSourceProvider, RemoteSourcePublisher, PostCommitCommandsProvider } from './bk';
 import { Event, SourceControlInputBox, Uri, SourceControl, Disposable, commands } from 'vscode';
 import { combinedDisposable, mapEvent } from '../util';
 import { toBkUri } from '../uri';
@@ -167,13 +167,13 @@ export class ApiRepository implements Repository {
     return this.repository.deleteBranch(name, force);
   }
 
-  getBranch(name: string): Promise<Branch> {
-    return this.repository.getBranch(name);
-  }
+  // getBranch(name: string): Promise<Branch> {
+  //   return this.repository.getBranch(name);
+  // }
 
-  getBranches(query: BranchQuery): Promise<Ref[]> {
-    return this.repository.getBranches(query);
-  }
+  // getBranches(query: BranchQuery): Promise<Ref[]> {
+  //   return this.repository.getBranches(query);
+  // }
 
   setBranchUpstream(name: string, upstream: string): Promise<void> {
     return this.repository.setBranchUpstream(name, upstream);

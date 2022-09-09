@@ -6,7 +6,6 @@
 
 import { promises as fs, exists, realpath } from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import * as cp from 'child_process';
 import { fileURLToPath } from 'url';
 import * as which from 'which';
@@ -16,7 +15,7 @@ import * as filetype from 'file-type';
 import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions, isWindows } from './util';
 import { CancellationToken, ConfigurationChangeEvent, Progress, Uri, workspace } from 'vscode';
 import { detectEncoding } from './encoding';
-import { Ref, RefType, Branch, ForcePushMode, BkErrorCodes, LogOptions, Change, Status, CommitOptions, BranchQuery } from './api/bk';
+import { Ref, RefType, ForcePushMode, BkErrorCodes, LogOptions, Change, Status, CommitOptions } from './api/bk';
 import * as byline from 'byline';
 import { StringDecoder } from 'string_decoder';
 
@@ -2019,7 +2018,7 @@ export class Repository {
 
 	async getHEAD(): Promise<Ref> {
 		try {
-			const result = await this.exec(['symbolic-ref', '--short', 'HEAD']);
+			const result = await this.exec(['root']);
 
 			if (!result.stdout) {
 				throw new Error('Not in a branch');
@@ -2027,66 +2026,61 @@ export class Repository {
 
 			return { name: result.stdout.trim(), commit: undefined, type: RefType.Head };
 		} catch (err:any) {
-			const result = await this.exec(['rev-parse', 'HEAD']);
-
-			if (!result.stdout) {
 				throw new Error('Error parsing HEAD');
-			}
-
-			return { name: undefined, commit: result.stdout.trim(), type: RefType.Head };
+			//return { name: undefined, commit: result.stdout.trim(), type: RefType.Head };
 		}
 	}
 
-	async findTrackingBranches(upstreamBranch: string): Promise<Branch[]> {
-		const result = await this.exec(['for-each-ref', '--format', '%(refname:short)%00%(upstream:short)', 'refs/heads']);
-		return result.stdout.trim().split('\n')
-			.map(line => line.trim().split('\0'))
-			.filter(([_, upstream]) => upstream === upstreamBranch)
-			.map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
-	}
+	// async findTrackingBranches(upstreamBranch: string): Promise<Branch[]> {
+	// 	const result = await this.exec(['for-each-ref', '--format', '%(refname:short)%00%(upstream:short)', 'refs/heads']);
+	// 	return result.stdout.trim().split('\n')
+	// 		.map(line => line.trim().split('\0'))
+	// 		.filter(([_, upstream]) => upstream === upstreamBranch)
+	// 		.map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
+	// }
 
-	async getRefs(opts?: { sort?: 'alphabetically' | 'committerdate'; contains?: string; pattern?: string; count?: number }): Promise<Ref[]> {
-		const args = ['for-each-ref'];
+	// async getRefs(opts?: { sort?: 'alphabetically' | 'committerdate'; contains?: string; pattern?: string; count?: number }): Promise<Ref[]> {
+	// 	const args = ['for-each-ref'];
 
-		if (opts?.count) {
-			args.push(`--count=${opts.count}`);
-		}
+	// 	if (opts?.count) {
+	// 		args.push(`--count=${opts.count}`);
+	// 	}
 
-		if (opts && opts.sort && opts.sort !== 'alphabetically') {
-			args.push('--sort', `-${opts.sort}`);
-		}
+	// 	if (opts && opts.sort && opts.sort !== 'alphabetically') {
+	// 		args.push('--sort', `-${opts.sort}`);
+	// 	}
 
-		args.push('--format', '%(refname) %(objectname) %(*objectname)');
+	// 	args.push('--format', '%(refname) %(objectname) %(*objectname)');
 
-		if (opts?.pattern) {
-			args.push(opts.pattern);
-		}
+	// 	if (opts?.pattern) {
+	// 		args.push(opts.pattern);
+	// 	}
 
-		if (opts?.contains) {
-			args.push('--contains', opts.contains);
-		}
+	// 	if (opts?.contains) {
+	// 		args.push('--contains', opts.contains);
+	// 	}
 
-		const result = await this.exec(args);
+	// 	const result = await this.exec(args);
 
-		const fn = (line: string): Ref | null => {
-			let match: RegExpExecArray | null;
+	// 	const fn = (line: string): Ref | null => {
+	// 		let match: RegExpExecArray | null;
 
-			if (match = /^refs\/heads\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-				return { name: match[1], commit: match[2], type: RefType.Head };
-			} else if (match = /^refs\/remotes\/([^/]+)\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-				return { name: `${match[1]}/${match[2]}`, commit: match[3], type: RefType.RemoteHead, remote: match[1] };
-			} else if (match = /^refs\/tags\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-				return { name: match[1], commit: match[3] ?? match[2], type: RefType.Tag };
-			}
+	// 		if (match = /^refs\/heads\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
+	// 			return { name: match[1], commit: match[2], type: RefType.Head };
+	// 		} else if (match = /^refs\/remotes\/([^/]+)\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
+	// 			return { name: `${match[1]}/${match[2]}`, commit: match[3], type: RefType.RemoteHead, remote: match[1] };
+	// 		} else if (match = /^refs\/tags\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
+	// 			return { name: match[1], commit: match[3] ?? match[2], type: RefType.Tag };
+	// 		}
 
-			return null;
-		};
+	// 		return null;
+	// 	};
 
-		return result.stdout.split('\n')
-			.filter(line => !!line)
-			.map(fn)
-			.filter(ref => !!ref) as Ref[];
-	}
+	// 	return result.stdout.split('\n')
+	// 		.filter(line => !!line)
+	// 		.map(fn)
+	// 		.filter(ref => !!ref) as Ref[];
+	// }
 
 	async getStashes(): Promise<Stash[]> {
 		const result = await this.exec(['stash', 'list']);
@@ -2132,93 +2126,93 @@ export class Repository {
 	// 	return remotes;
 	// }
 
-	async getBranch(name: string): Promise<Branch> {
-		if (name === 'HEAD') {
-			return this.getHEAD();
-		}
+	// async getBranch(name: string): Promise<Branch> {
+	// 	if (name === 'HEAD') {
+	// 		return this.getHEAD();
+	// 	}
 
-		const args = ['for-each-ref'];
+	// 	const args = ['for-each-ref'];
 
-		let supportsAheadBehind = true;
-		if (this._bk.compareBkVersionTo('1.9.0') === -1) {
-			args.push('--format=%(refname)%00%(upstream:short)%00%(objectname)');
-			supportsAheadBehind = false;
-		} else if (this._bk.compareBkVersionTo('2.16.0') === -1) {
-			args.push('--format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)');
-		} else {
-			args.push('--format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref)');
-		}
+	// 	let supportsAheadBehind = true;
+	// 	if (this._bk.compareBkVersionTo('1.9.0') === -1) {
+	// 		args.push('--format=%(refname)%00%(upstream:short)%00%(objectname)');
+	// 		supportsAheadBehind = false;
+	// 	} else if (this._bk.compareBkVersionTo('2.16.0') === -1) {
+	// 		args.push('--format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)');
+	// 	} else {
+	// 		args.push('--format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref)');
+	// 	}
 
-		if (/^refs\/(head|remotes)\//i.test(name)) {
-			args.push(name);
-		} else {
-			args.push(`refs/heads/${name}`, `refs/remotes/${name}`);
-		}
+	// 	if (/^refs\/(head|remotes)\//i.test(name)) {
+	// 		args.push(name);
+	// 	} else {
+	// 		args.push(`refs/heads/${name}`, `refs/remotes/${name}`);
+	// 	}
 
-		const result = await this.exec(args);
-		const branches: Branch[] = result.stdout.trim().split('\n').map<Branch | undefined>(line => {
-			let [branchName, upstream, ref, status, remoteName, upstreamRef] = line.trim().split('\0');
+	// 	const result = await this.exec(args);
+	// 	const branches: Branch[] = result.stdout.trim().split('\n').map<Branch | undefined>(line => {
+	// 		let [branchName, upstream, ref, status, remoteName, upstreamRef] = line.trim().split('\0');
 
-			if (branchName.startsWith('refs/heads/')) {
-				branchName = branchName.substring(11);
-				const index = upstream.indexOf('/');
+	// 		if (branchName.startsWith('refs/heads/')) {
+	// 			branchName = branchName.substring(11);
+	// 			const index = upstream.indexOf('/');
 
-				let ahead;
-				let behind;
-				const match = /\[(?:ahead ([0-9]+))?[,\s]*(?:behind ([0-9]+))?]|\[gone]/.exec(status);
-				if (match) {
-					[, ahead, behind] = match;
-				}
+	// 			let ahead;
+	// 			let behind;
+	// 			const match = /\[(?:ahead ([0-9]+))?[,\s]*(?:behind ([0-9]+))?]|\[gone]/.exec(status);
+	// 			if (match) {
+	// 				[, ahead, behind] = match;
+	// 			}
 
-				return {
-					type: RefType.Head,
-					name: branchName,
-					upstream: upstream ? {
-						name: upstreamRef ? upstreamRef.substring(11) : upstream.substring(index + 1),
-						remote: remoteName ? remoteName : upstream.substring(0, index)
-					} : undefined,
-					commit: ref || undefined,
-					ahead: Number(ahead) || 0,
-					behind: Number(behind) || 0,
-				};
-			} else if (branchName.startsWith('refs/remotes/')) {
-				branchName = branchName.substring(13);
-				const index = branchName.indexOf('/');
+	// 			return {
+	// 				type: RefType.Head,
+	// 				name: branchName,
+	// 				upstream: upstream ? {
+	// 					name: upstreamRef ? upstreamRef.substring(11) : upstream.substring(index + 1),
+	// 					remote: remoteName ? remoteName : upstream.substring(0, index)
+	// 				} : undefined,
+	// 				commit: ref || undefined,
+	// 				ahead: Number(ahead) || 0,
+	// 				behind: Number(behind) || 0,
+	// 			};
+	// 		} else if (branchName.startsWith('refs/remotes/')) {
+	// 			branchName = branchName.substring(13);
+	// 			const index = branchName.indexOf('/');
 
-				return {
-					type: RefType.RemoteHead,
-					name: branchName.substring(index + 1),
-					remote: branchName.substring(0, index),
-					commit: ref,
-				};
-			} else {
-				return undefined;
-			}
-		}).filter((b?: Branch): b is Branch => !!b);
+	// 			return {
+	// 				type: RefType.RemoteHead,
+	// 				name: branchName.substring(index + 1),
+	// 				remote: branchName.substring(0, index),
+	// 				commit: ref,
+	// 			};
+	// 		} else {
+	// 			return undefined;
+	// 		}
+	// 	}).filter((b?: Branch): b is Branch => !!b);
 
-		if (branches.length) {
-			const [branch] = branches;
+	// 	if (branches.length) {
+	// 		const [branch] = branches;
 
-			if (!supportsAheadBehind && branch.upstream) {
-				try {
-					const result = await this.exec(['rev-list', '--left-right', '--count', `${branch.name}...${branch.upstream.remote}/${branch.upstream.name}`]);
-					const [ahead, behind] = result.stdout.trim().split('\t');
+	// 		if (!supportsAheadBehind && branch.upstream) {
+	// 			try {
+	// 				const result = await this.exec(['rev-list', '--left-right', '--count', `${branch.name}...${branch.upstream.remote}/${branch.upstream.name}`]);
+	// 				const [ahead, behind] = result.stdout.trim().split('\t');
 
-					(branch as any).ahead = Number(ahead) || 0;
-					(branch as any).behind = Number(behind) || 0;
-				} catch { }
-			}
+	// 				(branch as any).ahead = Number(ahead) || 0;
+	// 				(branch as any).behind = Number(behind) || 0;
+	// 			} catch { }
+	// 		}
 
-			return branch;
-		}
+	// 		return branch;
+	// 	}
 
-		return Promise.reject<Branch>(new Error('No such branch'));
-	}
+	// 	return Promise.reject<Branch>(new Error('No such branch'));
+	// }
 
-	async getBranches(query: BranchQuery): Promise<Ref[]> {
-		const refs = await this.getRefs({ contains: query.contains, pattern: query.pattern ? `refs/${query.pattern}` : undefined, count: query.count });
-		return refs.filter(value => (value.type !== RefType.Tag) && (query.remote || !value.remote));
-	}
+	// async getBranches(query: BranchQuery): Promise<Ref[]> {
+	// 	const refs = await this.getRefs({ contains: query.contains, pattern: query.pattern ? `refs/${query.pattern}` : undefined, count: query.count });
+	// 	return refs.filter(value => (value.type !== RefType.Tag) && (query.remote || !value.remote));
+	// }
 
 	// TODO: Support core.commentChar
 	stripCommitMessageComments(message: string): string {
@@ -2247,29 +2241,29 @@ export class Repository {
 		}
 	}
 
-	async getCommitTemplate(): Promise<string> {
-		try {
-			const result = await this.exec(['config', '--get', 'commit.template']);
+	// async getCommitTemplate(): Promise<string> {
+	// 	try {
+	// 		const result = await this.exec(['config', '--get', 'commit.template']);
 
-			if (!result.stdout) {
-				return '';
-			}
+	// 		if (!result.stdout) {
+	// 			return '';
+	// 		}
 
-			// https://bkhub.com/bk/bk/blob/3a0f269e7c82aa3a87323cb7ae04ac5f129f036b/path.c#L612
-			const homedir = os.homedir();
-			let templatePath = result.stdout.trim()
-				.replace(/^~([^\/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
+	// 		// https://bkhub.com/bk/bk/blob/3a0f269e7c82aa3a87323cb7ae04ac5f129f036b/path.c#L612
+	// 		const homedir = os.homedir();
+	// 		let templatePath = result.stdout.trim()
+	// 			.replace(/^~([^\/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
 
-			if (!path.isAbsolute(templatePath)) {
-				templatePath = path.join(this.repositoryRoot, templatePath);
-			}
+	// 		if (!path.isAbsolute(templatePath)) {
+	// 			templatePath = path.join(this.repositoryRoot, templatePath);
+	// 		}
 
-			const raw = await fs.readFile(templatePath, 'utf8');
-			return this.stripCommitMessageComments(raw);
-		} catch (err:any) {
-			return '';
-		}
-	}
+	// 		const raw = await fs.readFile(templatePath, 'utf8');
+	// 		return this.stripCommitMessageComments(raw);
+	// 	} catch (err:any) {
+	// 		return '';
+	// 	}
+	// }
 
 	async getCommit(ref: string): Promise<Commit> {
 		const result = await this.exec(['show', '-s', `--format=${COMMIT_FORMAT}`, '-z', ref]);

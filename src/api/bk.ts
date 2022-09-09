@@ -198,9 +198,9 @@ export interface Repository {
 
   createBranch(name: string, checkout: boolean, ref?: string): Promise<void>;
   deleteBranch(name: string, force?: boolean): Promise<void>;
-  getBranch(name: string): Promise<Branch>;
-  getBranches(query: BranchQuery): Promise<Ref[]>;
-  setBranchUpstream(name: string, upstream: string): Promise<void>;
+  // getBranch(name: string): Promise<Branch>;
+  // getBranches(query: BranchQuery): Promise<Ref[]>;
+  // setBranchUpstream(name: string, upstream: string): Promise<void>;
 
   getMergeBase(ref1: string, ref2: string): Promise<string>;
 
@@ -210,9 +210,9 @@ export interface Repository {
   status(): Promise<void>;
   checkout(treeish: string): Promise<void>;
 
-  addRemote(name: string, url: string): Promise<void>;
-  removeRemote(name: string): Promise<void>;
-  renameRemote(name: string, newName: string): Promise<void>;
+  // addRemote(name: string, url: string): Promise<void>;
+  // removeRemote(name: string): Promise<void>;
+  // renameRemote(name: string, newName: string): Promise<void>;
 
   fetch(options?: FetchOptions): Promise<void>;
   fetch(remote?: string, ref?: string, depth?: number): Promise<void>;
