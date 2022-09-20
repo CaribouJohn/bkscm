@@ -3,7 +3,7 @@ const localize = nls.loadMessageBundle();
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { commands,Disposable, env, ExtensionContext, Uri, window, workspace } from 'vscode';
+import { commands, Disposable, env, ExtensionContext, Uri, window, workspace } from 'vscode';
 import { Bk, findBk, IBk } from './bitkeeper';
 import { OutputChannelLogger } from './log';
 import { Model } from './model';
@@ -16,6 +16,7 @@ import { BkDecorations } from './decorationProvider';
 import { BkExtension } from './api/bk';
 import { BkExtensionImpl } from './api/extension';
 import { registerAPICommands } from './api/api1';
+import { BkTimelineProvider } from './timelineProvider';
 
 
 
@@ -146,9 +147,9 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 		bkPath: info.path,
 		userAgent: `bk/${info.version} (${(os as any).version?.() ?? os.type()} ${os.release()}; ${os.platform()} ${os.arch()}) `, //vscode/${vscodeVersion} (${env.appName})
 		version: info.version,
-		env: env ,//environment,
+		env: env,//environment,
 	});
-	const model = new Model(bk,  context.globalState, outputChannelLogger);
+	const model = new Model(bk, context.globalState, outputChannelLogger);
 	disposables.push(model);
 
 	const onRepository = () => commands.executeCommand('setContext', 'bkOpenRepositoryCount', `${model.repositories.length}`);
@@ -173,7 +174,7 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 		cc,
 		new BkFileSystemProvider(model),
 		new BkDecorations(model),
-		//new BkTimelineProvider(model, cc),
+		new BkTimelineProvider(model, cc),
 		//new BkEditSessionIdentityProvider(model)
 	);
 
@@ -194,7 +195,7 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 // export function activate(context: vscode.ExtensionContext) {
-	
+
 // 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 // 	// This line of code will only be executed once when your extension is activated
 // 	console.log('Congratulations, your extension "bkscm" is now active!');
@@ -202,7 +203,7 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 // 	const bkSCM = vscode.scm.createSourceControl('bk', 'BitKeeper');
 // 	const workingTree = bkSCM.createResourceGroup('workingTree', 'Changes');
 
-// 	//need to initialize the current state of the repo. 
+// 	//need to initialize the current state of the repo.
 
 // 	//const index = bkSCM.createResourceGroup('index', 'Index');
 // 	// index.resourceStates = [
@@ -214,7 +215,7 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 // 	//   { resourceUri: createResourceUri('.travis.yml') },
 // 	//   { resourceUri: createResourceUri('README.md') }
 // 	// ];
-  
+
 // 	// The command has been defined in the package.json file
 // 	// Now provide the implementation of the command with registerCommand
 // 	// The commandId parameter must match the command field in package.json
@@ -255,7 +256,7 @@ export async function _activate(context: ExtensionContext): Promise<BkExtensionI
 	try {
 		const model = await createModel(context, outputChannelLogger, disposables);
 		return new BkExtensionImpl(model);
-	} catch (err:any) {
+	} catch (err: any) {
 		if (!/Bk installation not found/.test(err.message || '')) {
 			throw err;
 		}
@@ -291,4 +292,4 @@ export async function activate(context: ExtensionContext): Promise<BkExtension> 
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

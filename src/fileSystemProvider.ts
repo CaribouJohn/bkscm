@@ -9,7 +9,6 @@ import { fromBkUri, toBkUri } from './uri';
 import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util';
 import { Repository } from './repository';
 import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model';
-import { TextEncoder } from 'util';
 
 interface CacheRow {
 	uri: Uri;
@@ -48,7 +47,7 @@ export class BkFileSystemProvider implements FileSystemProvider {
 		this.disposables.push(
 			model.onDidChangeRepository(this.onDidChangeRepository, this),
 			model.onDidChangeOriginalResource(this.onDidChangeOriginalResource, this),
-			workspace.registerFileSystemProvider('gk', this, { isReadonly: true, isCaseSensitive: true }),
+			workspace.registerFileSystemProvider('bk', this, { isReadonly: true, isCaseSensitive: true }),
 		);
 
 		setInterval(() => this.cleanup(), FIVE_MINUTES);
@@ -156,7 +155,7 @@ export class BkFileSystemProvider implements FileSystemProvider {
 	async readFile(uri: Uri): Promise<Uint8Array> {
 		await this.model.isInitialized;
 
-		const { path, ref, submoduleOf } = fromBkUri(uri);
+		const { path, ref } = fromBkUri(uri);
 
 		// if (submoduleOf) {
 		// 	const repository = this.model.getRepository(submoduleOf);

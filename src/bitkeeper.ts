@@ -62,7 +62,7 @@ function parseVersion(raw: string): string {
 	let regex = /version: bk-([\d]+[.])*[\d]/gm;
 	let res = regex.exec(raw);
 	if (res) {
-		return res[0].replace(/version: bk-/,'');
+		return res[0].replace(/version: bk-/, '');
 	}
 	return "Unknown";
 }
@@ -134,7 +134,7 @@ function findSystemBkWin32(base: string, onValidate: (path: string) => boolean):
 }
 
 function findBkWin32InPath(onValidate: (path: string) => boolean): Promise<IBk> {
-	const whichPromise = new Promise<string>((c, e) => which('bk.exe', (err, path) => err ? e(err) : c(path?path:"")));
+	const whichPromise = new Promise<string>((c, e) => which('bk.exe', (err, path) => err ? e(err) : c(path ? path : "")));
 	return whichPromise.then(path => findSpecificBk(path, onValidate));
 }
 
@@ -239,7 +239,7 @@ async function exec(child: cp.ChildProcess, cancellationToken?: CancellationToke
 			onceEvent(cancellationToken.onCancellationRequested)(() => {
 				try {
 					child.kill();
-				} catch (err:any) {
+				} catch (err: any) {
 					// noop
 				}
 
@@ -362,7 +362,7 @@ const COMMIT_FORMAT = '%H%n%aN%n%aE%n%at%n%ct%n%P%n%D%n%B';
 
 export interface ICloneOptions {
 	readonly parentPath: string;
-	readonly progress: Progress<{ increment: number }>;
+	readonly progress: Progress<{ increment: number; }>;
 	readonly recursive?: boolean;
 }
 
@@ -400,7 +400,7 @@ export class Bk {
 		return Versions.compare(Versions.fromString(this.version), Versions.fromString(version));
 	}
 
-	open(repository: string, dotBk: { path: string; commonPath?: string }): Repository {
+	open(repository: string, dotBk: { path: string; commonPath?: string; }): Repository {
 		return new Repository(this, repository, dotBk);
 	}
 
@@ -510,7 +510,7 @@ export class Bk {
 		return repoPath;
 	}
 
-	async getRepositoryDotBk(repositoryPath: string): Promise<{ path: string; commonPath?: string }> {
+	async getRepositoryDotBk(repositoryPath: string): Promise<{ path: string; commonPath?: string; }> {
 		const result = await this.exec(repositoryPath, ['root']);
 		let dotBkPath = result.stdout;
 		let commonDotBkPath = path.join(dotBkPath, 'BitKeeper');
@@ -651,7 +651,7 @@ export class Bk {
 		this._onOutput.emit('log', output);
 	}
 
-	async mergeFile(options: { input1Path: string; input2Path: string; basePath: string; diff3?: boolean }): Promise<string> {
+	async mergeFile(options: { input1Path: string; input2Path: string; basePath: string; diff3?: boolean; }): Promise<string> {
 		const args = ['merge', '-p', options.input1Path, options.basePath, options.input2Path];
 		// if (options.diff3) {
 		// 	args.push('--diff3');
@@ -919,7 +919,7 @@ export function parseLsTree(raw: string): LsTreeElement[] {
 interface LsFilesElement {
 	mode: string;
 	object: string;
-	stage: string;
+	checkin: string;
 	file: string;
 }
 
@@ -928,7 +928,7 @@ export function parseLsFiles(raw: string): LsFilesElement[] {
 		.filter(l => !!l)
 		.map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line)!)
 		.filter(m => !!m)
-		.map(([, mode, object, stage, file]) => ({ mode, object, stage, file }));
+		.map(([, mode, object, checkin, file]) => ({ mode, object, checkin, file }));
 }
 
 export interface PullOptions {
@@ -942,7 +942,7 @@ export class Repository {
 	constructor(
 		private _bk: Bk,
 		private repositoryRoot: string,
-		readonly dotBk: { path: string; commonPath?: string }
+		readonly dotBk: { path: string; commonPath?: string; }
 	) { }
 
 	get bk(): Bk {
@@ -982,7 +982,7 @@ export class Repository {
 		return result.stdout.trim();
 	}
 
-	async getConfigs(scope: string): Promise<{ key: string; value: string }[]> {
+	async getConfigs(scope: string): Promise<{ key: string; value: string; }[]> {
 		const args = ['config'];
 
 		if (scope) {
@@ -1084,7 +1084,7 @@ export class Repository {
 		return stdout;
 	}
 
-	async getObjectDetails(treeish: string, path: string): Promise<{ mode: string; object: string; size: number }> {
+	async getObjectDetails(treeish: string, path: string): Promise<{ mode: string; object: string; size: number; }> {
 		if (!treeish) { // index
 			const elements = await this.lsfiles(path);
 
@@ -1115,14 +1115,14 @@ export class Repository {
 	}
 
 	async lsfiles(path: string): Promise<LsFilesElement[]> {
-		const { stdout } = await this.exec(['ls-files', '--stage', '--', sanitizePath(path)]);
+		const { stdout } = await this.exec(['ls-files', '--checkin', '--', sanitizePath(path)]);
 		return parseLsFiles(stdout);
 	}
 
 	async getBkRelativePath(ref: string, relativePath: string): Promise<string> {
 		const relativePathLowercase = relativePath.toLowerCase();
 		const dirname = path.posix.dirname(relativePath) + '/';
-		const elements: { file: string }[] = ref ? await this.lstree(ref, dirname) : await this.lsfiles(dirname);
+		const elements: { file: string; }[] = ref ? await this.lstree(ref, dirname) : await this.lsfiles(dirname);
 		const element = elements.filter(file => file.file.toLowerCase() === relativePathLowercase)[0];
 
 		if (!element) {
@@ -1132,13 +1132,13 @@ export class Repository {
 		return element.file;
 	}
 
-	async detectObjectType(object: string): Promise<{ mimetype: string; encoding?: string }> {
+	async detectObjectType(object: string): Promise<{ mimetype: string; encoding?: string; }> {
 		const child = await this.stream(['show', '--textconv', object]);
 		const buffer = await readBytes(child.stdout!, 4100);
 
 		try {
 			child.kill();
-		} catch (err:any) {
+		} catch (err: any) {
 			// noop
 		}
 
@@ -1369,7 +1369,7 @@ export class Repository {
 		return result.stdout.trim();
 	}
 
-	async add(paths: string[], opts?: { update?: boolean }): Promise<void> {
+	async add(paths: string[], opts?: { update?: boolean; }): Promise<void> {
 		const args = ['add'];
 
 		if (opts && opts.update) {
@@ -1399,7 +1399,7 @@ export class Repository {
 		await this.exec(args);
 	}
 
-	async stage(path: string, data: string): Promise<void> {
+	async checkin(path: string, data: string): Promise<void> {
 		const child = this.stream(['hash-object', '--stdin', '-w', '--path', sanitizePath(path)], { stdio: [null, null, null] });
 		child.stdin!.end(data, 'utf8');
 
@@ -1432,20 +1432,20 @@ export class Repository {
 		await this.exec(['update-index', add, '--cacheinfo', mode, hash, path]);
 	}
 
-	async checkout(treeish: string, paths: string[], opts: { track?: boolean; detached?: boolean } = Object.create(null)): Promise<void> {
-		const args = ['checkout', '-q'];
+	async checkout(_treeish: string, paths: string[], _opts: { track?: boolean; detached?: boolean; } = Object.create(null)): Promise<void> {
+		const args = ['pull','-q','-R'];
 
-		if (opts.track) {
-			args.push('--track');
-		}
+		// if (opts.track) {
+		// 	args.push('--track');
+		// }
 
-		if (opts.detached) {
-			args.push('--detach');
-		}
+		// if (opts.detached) {
+		// 	args.push('--detach');
+		// }
 
-		if (treeish) {
-			args.push(treeish);
-		}
+		// if (treeish) {
+		// 	args.push(treeish);
+		// }
 
 		try {
 			if (paths && paths.length > 0) {
@@ -1458,7 +1458,7 @@ export class Repository {
 		} catch (err: any) {
 			if (/Please,? commit your changes or stash them/.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.DirtyWorkTree;
-				err.bkTreeish = treeish;
+				err.bkTreeish = _treeish;
 			}
 
 			throw err;
@@ -1639,7 +1639,7 @@ export class Repository {
 
 		const limiter = new Limiter(5);
 		const promises: Promise<any>[] = [];
-		const args = ['clean', '-f', '-q'];
+		const args = ['unedit'];
 
 		for (const paths of groups) {
 			for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
@@ -1651,11 +1651,11 @@ export class Repository {
 	}
 
 	async undo(): Promise<void> {
-		await this.exec(['clean', '-fd']);
+		await this.exec(['unedit']);
 
 		try {
-			await this.exec(['checkout', '--', '.']);
-		} catch (err:any) {
+			await this.exec(['pull', '--', '.']);
+		} catch (err: any) {
 			if (/did not match any file\(s\) known to bk\./.test(err.stderr || '')) {
 				return;
 			}
@@ -1688,7 +1688,7 @@ export class Repository {
 			} else {
 				await this.exec([...args, '--', '.']);
 			}
-		} catch (err:any) {
+		} catch (err: any) {
 			// In case there are merge conflicts to be resolved, bk reset will output
 			// some "needs merge" data. We try to get around that.
 			if (/([^:]+: needs merge\n)+/m.test(err.stdout || '')) {
@@ -1714,7 +1714,7 @@ export class Repository {
 		await this.exec(args);
 	}
 
-	async fetch(options: { remote?: string; ref?: string; all?: boolean; prune?: boolean; depth?: number; silent?: boolean; readonly cancellationToken?: CancellationToken } = {}): Promise<void> {
+	async fetch(options: { remote?: string; ref?: string; all?: boolean; prune?: boolean; depth?: number; silent?: boolean; readonly cancellationToken?: CancellationToken; } = {}): Promise<void> {
 		const args = ['fetch'];
 		const spawnOptions: SpawnOptions = {
 			cancellationToken: options.cancellationToken,
@@ -1745,7 +1745,7 @@ export class Repository {
 
 		try {
 			await this.exec(args, spawnOptions);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/No remote repository specified\./.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.NoRemoteRepositorySpecified;
 			} else if (/Could not read from remote repository/.test(err.stderr || '')) {
@@ -1781,15 +1781,15 @@ export class Repository {
 				cancellationToken: options.cancellationToken,
 				env: { 'GIT_HTTP_USER_AGENT': this.bk.userAgent }
 			});
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || '')) {
 				err.bkErrorCode = BkErrorCodes.Conflict;
 			} else if (/Please tell me who you are\./.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.NoUserNameConfigured;
 			} else if (/Could not read from remote repository/.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.RemoteConnectionError;
-			} else if (/Pull(?:ing)? is not possible because you have unmerged files|Cannot pull with rebase: You have unstaged changes|Your local changes to the following files would be overwritten|Please, commit your changes before you can merge/i.test(err.stderr)) {
-				err.stderr = err.stderr.replace(/Cannot pull with rebase: You have unstaged changes/i, 'Cannot pull with rebase, you have unstaged changes');
+			} else if (/Pull(?:ing)? is not possible because you have unmerged files|Cannot pull with rebase: You have not checked in changes|Your local changes to the following files would be overwritten|Please, commit your changes before you can merge/i.test(err.stderr)) {
+				err.stderr = err.stderr.replace(/Cannot pull with rebase: You have not checked in changes/i, 'Cannot pull with rebase, you have not checked in changes');
 				err.bkErrorCode = BkErrorCodes.DirtyWorkTree;
 			} else if (/cannot lock ref|unable to update local ref/i.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.CantLockRef;
@@ -1808,7 +1808,7 @@ export class Repository {
 
 		try {
 			await this.exec(args, options);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || '')) {
 				err.bkErrorCode = BkErrorCodes.Conflict;
 			} else if (/cannot rebase onto multiple branches/i.test(err.stderr || '')) {
@@ -1850,7 +1850,7 @@ export class Repository {
 
 		try {
 			await this.exec(args, { env: { 'GIT_HTTP_USER_AGENT': this.bk.userAgent } });
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/^error: failed to push some refs to\b/m.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.PushRejected;
 			} else if (/Permission.*denied/.test(err.stderr || '')) {
@@ -1875,7 +1875,7 @@ export class Repository {
 			const args = ['blame', sanitizePath(path)];
 			const result = await this.exec(args);
 			return result.stdout.trim();
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/^fatal: no such path/.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.NoPathFound;
 			}
@@ -1897,7 +1897,7 @@ export class Repository {
 			}
 
 			await this.exec(args);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/No local changes to save/.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.NoLocalChanges;
 			}
@@ -1923,7 +1923,7 @@ export class Repository {
 			}
 
 			await this.exec(args);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/No stash found/.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.NoStashFound;
 			} else if (/error: Your local changes to the following files would be overwritten/.test(err.stderr || '')) {
@@ -1948,7 +1948,7 @@ export class Repository {
 
 		try {
 			await this.exec(args);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/No stash found/.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.NoStashFound;
 			}
@@ -1957,11 +1957,11 @@ export class Repository {
 		}
 	}
 
-	getStatus(opts?: { limit?: number; ignoreSubmodules?: boolean; untrackedChanges?: 'mixed' | 'separate' | 'hidden' }): Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean }> {
-		return new Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean }>((c, e) => {
+	getStatus(opts?: { limit?: number; ignoreSubmodules?: boolean; untrackedChanges?: 'mixed' | 'separate' | 'hidden'; }): Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean; }> {
+		return new Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean; }>((c, e) => {
 			const parser = new BkStatusParser();
 			const env = { GIT_OPTIONAL_LOCKS: '0' };
-			const args = ['gfiles', '-0' , '-cgxvp'];
+			const args = ['gfiles', '-0', '-cgxvp'];
 
 			// if (opts?.untrackedChanges === 'hidden') {
 			// 	args.push('-uno');
@@ -2025,8 +2025,8 @@ export class Repository {
 			}
 
 			return { name: result.stdout.trim(), commit: undefined, type: RefType.Head };
-		} catch (err:any) {
-				throw new Error('Error parsing HEAD');
+		} catch (err: any) {
+			throw new Error('Error parsing HEAD');
 			//return { name: undefined, commit: result.stdout.trim(), type: RefType.Head };
 		}
 	}
@@ -2288,7 +2288,7 @@ export class Repository {
 		try {
 			const bkmodulesRaw = await fs.readFile(bkmodulesPath, 'utf8');
 			return parseBkmodules(bkmodulesRaw);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/ENOENT/.test(err.message)) {
 				return [];
 			}

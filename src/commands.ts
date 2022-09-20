@@ -6,19 +6,19 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { LineChange, commands, Disposable, MessageOptions, Position, ProgressLocation, QuickPickItem, Range, SourceControlResourceState, TextDocumentShowOptions, TextEditor, Uri, ViewColumn, window, workspace, WorkspaceEdit, WorkspaceFolder,  Selection, TextDocumentContentProvider, InputBoxValidationSeverity, TabInputText, TabInputTextMerge } from 'vscode';
+import { LineChange, commands, Disposable, MessageOptions, Position, ProgressLocation, QuickPickItem, Range, SourceControlResourceState, TextDocumentShowOptions, TextEditor, Uri, ViewColumn, window, workspace, WorkspaceEdit, WorkspaceFolder, Selection, TextDocumentContentProvider, InputBoxValidationSeverity, TabInputText, TabInputTextMerge, TimelineItem, Command } from 'vscode';
 import * as nls from 'vscode-nls';
 import { uniqueNamesGenerator, adjectives, animals, colors, NumberDictionary } from '@joaomoreno/unique-names-generator';
 import { Branch, ForcePushMode, BkErrorCodes, Ref, RefType, Status, CommitOptions, RemoteSourcePublisher } from './api/bk';
 import { Bk, Stash } from './bitkeeper';
 import { Model } from './model';
 import { Repository, Resource, ResourceGroupType } from './repository';
-import { applyLineChanges, getModifiedRange, intersectDiffWithRange, invertLineChange, toLineRanges } from './staging';
+import { applyLineChanges, getModifiedRange, intersectDiffWithRange, toLineRanges } from './staging';
 import { fromBkUri, toBkUri, isBkUri, toMergeUris } from './uri';
 import { grep, isDescendant, pathEquals, relativePath } from './util';
 import { LogLevel, OutputChannelLogger } from './log';
 import { ApiRepository } from './api/api1';
-// import { BkTimelineItem } from './timelineProvider';
+import { BkTimelineItem } from './timelineProvider';
 // import { pickRemoteSource } from './remoteSource';
 
 
@@ -34,7 +34,7 @@ class CheckoutItem implements QuickPickItem {
 
 	constructor(protected repository: Repository, protected ref: Ref) { }
 
-	async run(opts?: { detached?: boolean }): Promise<void> {
+	async run(opts?: { detached?: boolean; }): Promise<void> {
 		const ref = this.ref.name;
 
 		if (!ref) {
@@ -60,7 +60,7 @@ class CheckoutRemoteHeadItem extends CheckoutItem {
 		return localize('remote branch at', "Remote branch at {0}", this.shortCommit);
 	}
 
-	override async run(_opts?: { detached?: boolean }): Promise<void> {
+	override async run(_opts?: { detached?: boolean; }): Promise<void> {
 		if (!this.ref.name) {
 			return;
 		}
@@ -193,7 +193,7 @@ function command(commandId: string, options: ScmCommandOptions = {}): Function {
 // 	'image/bmp'
 // ];
 
-async function categorizeResourceByResolution(resources: Resource[]): Promise<{ merge: Resource[]; resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
+async function categorizeResourceByResolution(resources: Resource[]): Promise<{ merge: Resource[]; resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[]; }> {
 	const selection = resources.filter(s => s instanceof Resource) as Resource[];
 	const merge = selection.filter(s => s.resourceGroupType === ResourceGroupType.Merge);
 	const isBothAddedOrModified = (s: Resource) => s.type === Status.BOTH_MODIFIED || s.type === Status.BOTH_ADDED;
@@ -240,7 +240,7 @@ class CheckoutProcessor {
 
 	private refs: Ref[] = [];
 	get items(): CheckoutItem[] { return this.refs.map(r => new this.ctor(this.repository, r)); }
-	constructor(private repository: Repository, private type: RefType, private ctor: { new(repository: Repository, ref: Ref): CheckoutItem }) { }
+	constructor(private repository: Repository, private type: RefType, private ctor: { new(repository: Repository, ref: Ref): CheckoutItem; }) { }
 
 	onRef(ref: Ref): void {
 		if (ref.type === this.type) {
@@ -326,7 +326,7 @@ export class CommandCenter {
 			// if (options.diff) {
 			// 	return commands.registerDiffInformationCommand(commandId, command);
 			// } else {
-				return commands.registerCommand(commandId, command);
+			return commands.registerCommand(commandId, command);
 			// }
 		});
 
@@ -422,7 +422,7 @@ export class CommandCenter {
 
 		const isRebasing = false;  //Boolean(repo.rebaseCommit);
 
-		type InputData = { uri: Uri; title?: string; detail?: string; description?: string };
+		type InputData = { uri: Uri; title?: string; detail?: string; description?: string; };
 		const mergeUris = toMergeUris(uri);
 		const current: InputData = { uri: mergeUris.ours, title: localize('Current', 'Current') };
 		const incoming: InputData = { uri: mergeUris.theirs, title: localize('Incoming', 'Incoming') };
@@ -459,7 +459,7 @@ export class CommandCenter {
 		);
 	}
 
-	async cloneRepository(url?: string, parentPath?: string, options: { recursive?: boolean; ref?: string } = {}): Promise<void> {
+	async cloneRepository(url?: string, parentPath?: string, options: { recursive?: boolean; ref?: string; } = {}): Promise<void> {
 		// if (!url || typeof url !== 'string') {
 		// 	url = await pickRemoteSource({
 		// 		providerLabel: provider => localize('clonefrom', "Clone from {0}", provider.name),
@@ -474,7 +474,7 @@ export class CommandCenter {
 					"outcome" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "comment": "The outcome of the bk operation" }
 				}
 			*/
-//			this.telemetryReporter.sendTelemetryEvent('clone', { outcome: 'no_URL' });
+			//			this.telemetryReporter.sendTelemetryEvent('clone', { outcome: 'no_URL' });
 			return;
 		}
 
@@ -577,7 +577,7 @@ export class CommandCenter {
 			} else if (action === PostCloneAction.OpenNewWindow) {
 				commands.executeCommand('vscode.openFolder', uri, { forceNewWindow: true });
 			}
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/already exists and is not an empty directory/.test(err && err.stderr || '')) {
 				/* __GDPR__
 					"clone" : {
@@ -603,7 +603,7 @@ export class CommandCenter {
 	}
 
 	@command('bk.clone')
-	async clone(url?: string, parentPath?: string, options?: { ref?: string }): Promise<void> {
+	async clone(url?: string, parentPath?: string, options?: { ref?: string; }): Promise<void> {
 		await this.cloneRepository(url, parentPath, options);
 	}
 
@@ -624,7 +624,7 @@ export class CommandCenter {
 			} else {
 				const placeHolder = localize('init', "Pick workspace folder to initialize bk repo in");
 				const pick = { label: localize('choose', "Choose Folder...") };
-				const items: { label: string; folder?: WorkspaceFolder }[] = [
+				const items: { label: string; folder?: WorkspaceFolder; }[] = [
 					...workspace.workspaceFolders.map(folder => ({ label: folder.name, description: folder.uri.fsPath, folder })),
 					pick
 				];
@@ -898,16 +898,16 @@ export class CommandCenter {
 		await repository.move(from, to);
 	}
 
-	@command('bk.stage')
-	async stage(...resourceStates: SourceControlResourceState[]): Promise<void> {
-		this.outputChannelLogger.logDebug(`bk.stage ${resourceStates.length} `);
+	@command('bk.checkin')
+	async checkin(...resourceStates: SourceControlResourceState[]): Promise<void> {
+		this.outputChannelLogger.logDebug(`bk.checkin ${resourceStates.length} `);
 
 		resourceStates = resourceStates.filter(s => !!s);
 
 		if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
 			const resource = this.getSCMResource();
 
-			this.outputChannelLogger.logDebug(`bk.stage.getSCMResource ${resource ? resource.resourceUri.toString() : null} `);
+			this.outputChannelLogger.logDebug(`bk.checkin.getSCMResource ${resource ? resource.resourceUri.toString() : null} `);
 
 			if (!resource) {
 				return;
@@ -921,8 +921,8 @@ export class CommandCenter {
 
 		if (unresolved.length > 0) {
 			const message = unresolved.length > 1
-				? localize('confirm stage files with merge conflicts', "Are you sure you want to stage {0} files with merge conflicts?", unresolved.length)
-				: localize('confirm stage file with merge conflicts', "Are you sure you want to stage {0} with merge conflicts?", path.basename(unresolved[0].resourceUri.fsPath));
+				? localize('confirm checkin files with merge conflicts', "Are you sure you want to checkin {0} files with merge conflicts?", unresolved.length)
+				: localize('confirm checkin file with merge conflicts', "Are you sure you want to checkin {0} with merge conflicts?", path.basename(unresolved[0].resourceUri.fsPath));
 
 			const yes = localize('yes', "Yes");
 			const pick = await window.showWarningMessage(message, { modal: true }, yes);
@@ -935,10 +935,10 @@ export class CommandCenter {
 		try {
 			await this.runByRepository(deletionConflicts.map(r => r.resourceUri), async (repository, resources) => {
 				for (const resource of resources) {
-					await this._stageDeletionConflict(repository, resource);
+					await this._checkinDeletionConflict(repository, resource);
 				}
 			});
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/Cancelled/.test(err.message)) {
 				return;
 			}
@@ -950,7 +950,7 @@ export class CommandCenter {
 		const untracked = selection.filter(s => s.resourceGroupType === ResourceGroupType.Untracked);
 		const scmResources = [...workingTree, ...untracked, ...resolved, ...unresolved];
 
-		this.outputChannelLogger.logDebug(`bk.stage.scmResources ${scmResources.length} `);
+		this.outputChannelLogger.logDebug(`bk.checkin.scmResources ${scmResources.length} `);
 		if (!scmResources.length) {
 			return;
 		}
@@ -959,8 +959,8 @@ export class CommandCenter {
 		await this.runByRepository(resources, async (repository, resources) => repository.add(resources));
 	}
 
-	@command('bk.stageAll', { repository: true })
-	async stageAll(repository: Repository): Promise<void> {
+	@command('bk.checkinAll', { repository: true })
+	async checkinAll(repository: Repository): Promise<void> {
 		const resources = [...repository.workingTreeGroup.resourceStates, ...repository.untrackedGroup.resourceStates];
 		const uris = resources.map(r => r.resourceUri);
 
@@ -971,7 +971,7 @@ export class CommandCenter {
 		}
 	}
 
-	private async _stageDeletionConflict(repository: Repository, uri: Uri): Promise<void> {
+	private async _checkinDeletionConflict(repository: Repository, uri: Uri): Promise<void> {
 		const uriString = uri.toString();
 		const resource = repository.mergeGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0];
 
@@ -1006,8 +1006,8 @@ export class CommandCenter {
 		}
 	}
 
-	@command('bk.stageAllTracked', { repository: true })
-	async stageAllTracked(repository: Repository): Promise<void> {
+	@command('bk.checkinAllTracked', { repository: true })
+	async checkinAllTracked(repository: Repository): Promise<void> {
 		const resources = repository.workingTreeGroup.resourceStates
 			.filter(r => r.type !== Status.UNTRACKED && r.type !== Status.IGNORED);
 		const uris = resources.map(r => r.resourceUri);
@@ -1015,8 +1015,8 @@ export class CommandCenter {
 		await repository.add(uris);
 	}
 
-	@command('bk.stageAllUntracked', { repository: true })
-	async stageAllUntracked(repository: Repository): Promise<void> {
+	@command('bk.checkinAllUntracked', { repository: true })
+	async checkinAllUntracked(repository: Repository): Promise<void> {
 		const resources = [...repository.workingTreeGroup.resourceStates, ...repository.untrackedGroup.resourceStates]
 			.filter(r => r.type === Status.UNTRACKED || r.type === Status.IGNORED);
 		const uris = resources.map(r => r.resourceUri);
@@ -1024,16 +1024,16 @@ export class CommandCenter {
 		await repository.add(uris);
 	}
 
-	@command('bk.stageAllMerge', { repository: true })
-	async stageAllMerge(repository: Repository): Promise<void> {
+	@command('bk.checkinAllMerge', { repository: true })
+	async checkinAllMerge(repository: Repository): Promise<void> {
 		const resources = repository.mergeGroup.resourceStates.filter(s => s instanceof Resource) as Resource[];
 		const { merge, unresolved, deletionConflicts } = await categorizeResourceByResolution(resources);
 
 		try {
 			for (const deletionConflict of deletionConflicts) {
-				await this._stageDeletionConflict(repository, deletionConflict.resourceUri);
+				await this._checkinDeletionConflict(repository, deletionConflict.resourceUri);
 			}
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/Cancelled/.test(err.message)) {
 				return;
 			}
@@ -1043,8 +1043,8 @@ export class CommandCenter {
 
 		if (unresolved.length > 0) {
 			const message = unresolved.length > 1
-				? localize('confirm stage files with merge conflicts', "Are you sure you want to stage {0} files with merge conflicts?", merge.length)
-				: localize('confirm stage file with merge conflicts', "Are you sure you want to stage {0} with merge conflicts?", path.basename(merge[0].resourceUri.fsPath));
+				? localize('confirm checkin files with merge conflicts', "Are you sure you want to checkin {0} files with merge conflicts?", merge.length)
+				: localize('confirm checkin file with merge conflicts', "Are you sure you want to checkin {0} with merge conflicts?", path.basename(merge[0].resourceUri.fsPath));
 
 			const yes = localize('yes', "Yes");
 			const pick = await window.showWarningMessage(message, { modal: true }, yes);
@@ -1061,8 +1061,8 @@ export class CommandCenter {
 		}
 	}
 
-	@command('bk.stageChange')
-	async stageChange(uri: Uri, changes: LineChange[], index: number): Promise<void> {
+	@command('bk.checkinChange')
+	async checkinChange(uri: Uri, changes: LineChange[], index: number): Promise<void> {
 		if (!uri) {
 			return;
 		}
@@ -1073,14 +1073,14 @@ export class CommandCenter {
 			return;
 		}
 
-		await this._stageChanges(textEditor, [changes[index]]);
+		await this._checkinChanges(textEditor, [changes[index]]);
 
-		const firstStagedLine = changes[index].modifiedStartLineNumber - 1;
-		textEditor.selections = [new Selection(firstStagedLine, 0, firstStagedLine, 0)];
+		const firstCheckedInLine = changes[index].modifiedStartLineNumber - 1;
+		textEditor.selections = [new Selection(firstCheckedInLine, 0, firstCheckedInLine, 0)];
 	}
 
-	@command('bk.stageSelectedRanges', { diff: true })
-	async stageSelectedChanges(changes: LineChange[]): Promise<void> {
+	@command('bk.checkinSelectedRanges', { diff: true })
+	async checkinSelectedChanges(changes: LineChange[]): Promise<void> {
 		const textEditor = window.activeTextEditor;
 
 		if (!textEditor) {
@@ -1097,7 +1097,7 @@ export class CommandCenter {
 			return;
 		}
 
-		await this._stageChanges(textEditor, selectedChanges);
+		await this._checkinChanges(textEditor, selectedChanges);
 	}
 
 	@command('bk.acceptMerge')
@@ -1133,7 +1133,7 @@ export class CommandCenter {
 			didCloseTab = await window.tabGroups.close(mergeEditorTabs, true);
 		}
 
-		// Only stage if the merge editor has been successfully closed. That means all conflicts have been
+		// Only checkin if the merge editor has been successfully closed. That means all conflicts have been
 		// handled or unhandled conflicts are OK by the user.
 		if (didCloseTab) {
 			await repository.add([uri]);
@@ -1186,7 +1186,7 @@ export class CommandCenter {
 		await workspace.applyEdit(e);
 	}
 
-	private async _stageChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+	private async _checkinChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
 		const modifiedDocument = textEditor.document;
 		const modifiedUri = modifiedDocument.uri;
 
@@ -1198,7 +1198,7 @@ export class CommandCenter {
 		const originalDocument = await workspace.openTextDocument(originalUri);
 		const result = applyLineChanges(originalDocument, modifiedDocument, changes);
 
-		await this.runByRepository(modifiedUri, async (repository, resource) => await repository.stage(resource, result));
+		await this.runByRepository(modifiedUri, async (repository, resource) => await repository.checkin(resource, result));
 	}
 
 	@command('bk.revertChange')
@@ -1215,8 +1215,8 @@ export class CommandCenter {
 
 		await this._revertChanges(textEditor, [...changes.slice(0, index), ...changes.slice(index + 1)]);
 
-		const firstStagedLine = changes[index].modifiedStartLineNumber - 1;
-		textEditor.selections = [new Selection(firstStagedLine, 0, firstStagedLine, 0)];
+		const firstCheckedInLine = changes[index].modifiedStartLineNumber - 1;
+		textEditor.selections = [new Selection(firstCheckedInLine, 0, firstCheckedInLine, 0)];
 	}
 
 	@command('bk.revertSelectedRanges', { diff: true })
@@ -1265,73 +1265,73 @@ export class CommandCenter {
 		textEditor.revealRange(visibleRangesBeforeRevert[0]);
 	}
 
-	@command('bk.unstage')
-	async unstage(...resourceStates: SourceControlResourceState[]): Promise<void> {
-		resourceStates = resourceStates.filter(s => !!s);
+	// @command('bk.uncheckin')
+	// async uncheckin(...resourceStates: SourceControlResourceState[]): Promise<void> {
+	// 	resourceStates = resourceStates.filter(s => !!s);
 
-		if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
-			const resource = this.getSCMResource();
+	// 	if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
+	// 		const resource = this.getSCMResource();
 
-			if (!resource) {
-				return;
-			}
+	// 		if (!resource) {
+	// 			return;
+	// 		}
 
-			resourceStates = [resource];
-		}
+	// 		resourceStates = [resource];
+	// 	}
 
-		const scmResources = resourceStates
-			.filter(s => s instanceof Resource && s.resourceGroupType === ResourceGroupType.Index) as Resource[];
+	// 	const scmResources = resourceStates
+	// 		.filter(s => s instanceof Resource && s.resourceGroupType === ResourceGroupType.Index) as Resource[];
 
-		if (!scmResources.length) {
-			return;
-		}
+	// 	if (!scmResources.length) {
+	// 		return;
+	// 	}
 
-		const resources = scmResources.map(r => r.resourceUri);
-		await this.runByRepository(resources, async (repository, resources) => repository.revert(resources));
-	}
+	// 	const resources = scmResources.map(r => r.resourceUri);
+	// 	await this.runByRepository(resources, async (repository, resources) => repository.revert(resources));
+	// }
 
-	@command('bk.unstageAll', { repository: true })
-	async unstageAll(repository: Repository): Promise<void> {
-		await repository.revert([]);
-	}
+	// @command('bk.uncheckinAll', { repository: true })
+	// async uncheckinAll(repository: Repository): Promise<void> {
+	// 	await repository.revert([]);
+	// }
 
-	@command('bk.unstageSelectedRanges', { diff: true })
-	async unstageSelectedRanges(diffs: LineChange[]): Promise<void> {
-		const textEditor = window.activeTextEditor;
+	// @command('bk.uncheckinSelectedRanges', { diff: true })
+	// async uncheckinSelectedRanges(diffs: LineChange[]): Promise<void> {
+	// 	const textEditor = window.activeTextEditor;
 
-		if (!textEditor) {
-			return;
-		}
+	// 	if (!textEditor) {
+	// 		return;
+	// 	}
 
-		const modifiedDocument = textEditor.document;
-		const modifiedUri = modifiedDocument.uri;
+	// 	const modifiedDocument = textEditor.document;
+	// 	const modifiedUri = modifiedDocument.uri;
 
-		if (!isBkUri(modifiedUri)) {
-			return;
-		}
+	// 	if (!isBkUri(modifiedUri)) {
+	// 		return;
+	// 	}
 
-		const { ref } = fromBkUri(modifiedUri);
+	// 	const { ref } = fromBkUri(modifiedUri);
 
-		if (ref !== '') {
-			return;
-		}
+	// 	if (ref !== '') {
+	// 		return;
+	// 	}
 
-		const originalUri = toBkUri(modifiedUri, 'HEAD');
-		const originalDocument = await workspace.openTextDocument(originalUri);
-		const selectedLines = toLineRanges(textEditor.selections, modifiedDocument);
-		const selectedDiffs = diffs
-			.map(diff => selectedLines.reduce<LineChange | null>((result, range) => result || intersectDiffWithRange(modifiedDocument, diff, range), null))
-			.filter(d => !!d) as LineChange[];
+	// 	const originalUri = toBkUri(modifiedUri, 'HEAD');
+	// 	const originalDocument = await workspace.openTextDocument(originalUri);
+	// 	const selectedLines = toLineRanges(textEditor.selections, modifiedDocument);
+	// 	const selectedDiffs = diffs
+	// 		.map(diff => selectedLines.reduce<LineChange | null>((result, range) => result || intersectDiffWithRange(modifiedDocument, diff, range), null))
+	// 		.filter(d => !!d) as LineChange[];
 
-		if (!selectedDiffs.length) {
-			return;
-		}
+	// 	if (!selectedDiffs.length) {
+	// 		return;
+	// 	}
 
-		const invertedDiffs = selectedDiffs.map(invertLineChange);
-		const result = applyLineChanges(modifiedDocument, originalDocument, invertedDiffs);
+	// 	const invertedDiffs = selectedDiffs.map(invertLineChange);
+	// 	const result = applyLineChanges(modifiedDocument, originalDocument, invertedDiffs);
 
-		await this.runByRepository(modifiedUri, async (repository, resource) => await repository.stage(resource, result));
-	}
+	// 	await this.runByRepository(modifiedUri, async (repository, resource) => await repository.checkin(resource, result));
+	// }
 
 	@command('bk.clean')
 	async clean(...resourceStates: SourceControlResourceState[]): Promise<void> {
@@ -1508,7 +1508,7 @@ export class CommandCenter {
 		opts: CommitOptions
 	): Promise<boolean> {
 		const config = workspace.getConfiguration('bk', Uri.file(repository.root));
-		let promptToSaveFilesBeforeCommit = config.get<'always' | 'staged' | 'never'>('promptToSaveFilesBeforeCommit');
+		let promptToSaveFilesBeforeCommit = config.get<'always' | 'checkind' | 'never'>('promptToSaveFilesBeforeCommit');
 
 		// migration
 		if (promptToSaveFilesBeforeCommit as any === true) {
@@ -1519,14 +1519,14 @@ export class CommandCenter {
 
 		const enableSmartCommit = config.get<boolean>('enableSmartCommit') === true;
 		const enableCommitSigning = config.get<boolean>('enableCommitSigning') === true;
-		let noStagedChanges = repository.indexGroup.resourceStates.length === 0;
-		let noUnstagedChanges = repository.workingTreeGroup.resourceStates.length === 0;
+		let noCheckedInChanges = repository.indexGroup.resourceStates.length === 0;
+		let noUncheckindChanges = repository.workingTreeGroup.resourceStates.length === 0;
 
 		if (promptToSaveFilesBeforeCommit !== 'never') {
 			let documents = workspace.textDocuments
 				.filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
 
-			if (promptToSaveFilesBeforeCommit === 'staged' || repository.indexGroup.resourceStates.length > 0) {
+			if (promptToSaveFilesBeforeCommit === 'checkind' || repository.indexGroup.resourceStates.length > 0) {
 				documents = documents
 					.filter(d => repository.indexGroup.resourceStates.some(s => pathEquals(s.resourceUri.fsPath, d.uri.fsPath)));
 			}
@@ -1536,15 +1536,15 @@ export class CommandCenter {
 					? localize('unsaved files single', "The following file has unsaved changes which won't be included in the commit if you proceed: {0}.\n\nWould you like to save it before committing?", path.basename(documents[0].uri.fsPath))
 					: localize('unsaved files', "There are {0} unsaved files.\n\nWould you like to save them before committing?", documents.length);
 				const saveAndCommit = localize('save and commit', "Save All & Commit");
-				const commit = localize('commit', "Commit Staged Changes");
+				const commit = localize('commit', "Commit CheckedIn Changes");
 				const pick = await window.showWarningMessage(message, { modal: true }, saveAndCommit, commit);
 
 				if (pick === saveAndCommit) {
 					await Promise.all(documents.map(d => d.save()));
 					await repository.add(documents.map(d => d.uri));
 
-					noStagedChanges = repository.indexGroup.resourceStates.length === 0;
-					noUnstagedChanges = repository.workingTreeGroup.resourceStates.length === 0;
+					noCheckedInChanges = repository.indexGroup.resourceStates.length === 0;
+					noUncheckindChanges = repository.workingTreeGroup.resourceStates.length === 0;
 				} else if (pick !== commit) {
 					return false; // do not commit on cancel
 				}
@@ -1552,7 +1552,7 @@ export class CommandCenter {
 		}
 
 		// no changes, and the user has not configured to commit all in this case
-		if (!noUnstagedChanges && noStagedChanges && !enableSmartCommit && !opts.empty && !opts.all) {
+		if (!noUncheckindChanges && noCheckedInChanges && !enableSmartCommit && !opts.empty && !opts.all) {
 			const suggestSmartCommit = config.get<boolean>('suggestSmartCommit') === true;
 
 			if (!suggestSmartCommit) {
@@ -1560,7 +1560,7 @@ export class CommandCenter {
 			}
 
 			// prompt the user if we want to commit all or not
-			const message = localize('no staged changes', "There are no staged changes to commit.\n\nWould you like to stage all your changes and commit them directly?");
+			const message = localize('no checkind changes', "There are no checkind changes to commit.\n\nWould you like to checkin all your changes and commit them directly?");
 			const yes = localize('yes', "Yes");
 			const always = localize('always', "Always");
 			const never = localize('never', "Never");
@@ -1577,8 +1577,8 @@ export class CommandCenter {
 		}
 
 		if (opts.all === undefined) {
-			opts = { ...opts, all: noStagedChanges };
-		} else if (!opts.all && noStagedChanges && !opts.empty) {
+			opts = { ...opts, all: noCheckedInChanges };
+		} else if (!opts.all && noCheckedInChanges && !opts.empty) {
 			opts = { ...opts, all: true };
 		}
 
@@ -1602,11 +1602,11 @@ export class CommandCenter {
 		if (
 			(
 				// no changes
-				(noStagedChanges && noUnstagedChanges)
-				// or no staged changes and not `all`
-				|| (!opts.all && noStagedChanges)
-				// no staged changes and no tracked unstaged changes
-				|| (noStagedChanges && smartCommitChanges === 'tracked' && repository.workingTreeGroup.resourceStates.every(r => r.type === Status.UNTRACKED))
+				(noCheckedInChanges && noUncheckindChanges)
+				// or no checkind changes and not `all`
+				|| (!opts.all && noCheckedInChanges)
+				// no checkind changes and no tracked uncheckind changes
+				|| (noCheckedInChanges && smartCommitChanges === 'tracked' && repository.workingTreeGroup.resourceStates.every(r => r.type === Status.UNTRACKED))
 			)
 			// amend allows changing only the commit message
 			&& !opts.amend
@@ -1737,18 +1737,18 @@ export class CommandCenter {
 		await this.commitWithAnyInput(repository, { postCommitCommand });
 	}
 
-	@command('bk.commitStaged', { repository: true })
-	async commitStaged(repository: Repository): Promise<void> {
+	@command('bk.pushCheckedIn', { repository: true })
+	async pushCheckedIn(repository: Repository): Promise<void> {
 		await this.commitWithAnyInput(repository, { all: false });
 	}
 
-	@command('bk.commitStagedSigned', { repository: true })
-	async commitStagedSigned(repository: Repository): Promise<void> {
+	@command('bk.pushCheckedInSigned', { repository: true })
+	async pushCheckedInSigned(repository: Repository): Promise<void> {
 		await this.commitWithAnyInput(repository, { all: false, signoff: true });
 	}
 
-	@command('bk.commitStagedAmend', { repository: true })
-	async commitStagedAmend(repository: Repository): Promise<void> {
+	@command('bk.pushCheckedInAmend', { repository: true })
+	async pushCheckedInAmend(repository: Repository): Promise<void> {
 		await this.commitWithAnyInput(repository, { all: false, amend: true });
 	}
 
@@ -1843,18 +1843,18 @@ export class CommandCenter {
 		await this.commitWithAnyInput(repository, { noVerify: true });
 	}
 
-	@command('bk.commitStagedNoVerify', { repository: true })
-	async commitStagedNoVerify(repository: Repository): Promise<void> {
+	@command('bk.pushCheckedInNoVerify', { repository: true })
+	async pushCheckedInNoVerify(repository: Repository): Promise<void> {
 		await this.commitWithAnyInput(repository, { all: false, noVerify: true });
 	}
 
-	@command('bk.commitStagedSignedNoVerify', { repository: true })
-	async commitStagedSignedNoVerify(repository: Repository): Promise<void> {
+	@command('bk.pushCheckedInSignedNoVerify', { repository: true })
+	async pushCheckedInSignedNoVerify(repository: Repository): Promise<void> {
 		await this.commitWithAnyInput(repository, { all: false, signoff: true, noVerify: true });
 	}
 
-	@command('bk.commitStagedAmendNoVerify', { repository: true })
-	async commitStagedAmendNoVerify(repository: Repository): Promise<void> {
+	@command('bk.pushCheckedInAmendNoVerify', { repository: true })
+	async pushCheckedInAmendNoVerify(repository: Repository): Promise<void> {
 		await this.commitWithAnyInput(repository, { all: false, amend: true, noVerify: true });
 	}
 
@@ -1907,7 +1907,7 @@ export class CommandCenter {
 			await repository.reset('HEAD~');
 		} else {
 			await repository.deleteRef('HEAD');
-			await this.unstageAll(repository);
+			//await this.uncheckinAll(repository);
 		}
 
 		repository.inputBox.value = commit.message;
@@ -1923,7 +1923,7 @@ export class CommandCenter {
 		return this._checkout(repository, { detached: true, treeish });
 	}
 
-	private async _checkout(repository: Repository, opts?: { detached?: boolean; treeish?: string }): Promise<boolean> {
+	private async _checkout(repository: Repository, opts?: { detached?: boolean; treeish?: string; }): Promise<boolean> {
 		if (typeof opts?.treeish === 'string') {
 			await repository.checkout(opts?.treeish, opts);
 			return true;
@@ -1966,7 +1966,7 @@ export class CommandCenter {
 
 			try {
 				await item.run(opts);
-			} catch (err:any) {
+			} catch (err: any) {
 				if (err.bkErrorCode !== BkErrorCodes.DirtyWorkTree) {
 					throw err;
 				}
@@ -2139,7 +2139,7 @@ export class CommandCenter {
 
 		try {
 			await run(force);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (err.bkErrorCode !== BkErrorCodes.BranchNotFullyMerged) {
 				throw err;
 			}
@@ -2165,7 +2165,7 @@ export class CommandCenter {
 
 		try {
 			await repository.renameBranch(branchName);
-		} catch (err:any) {
+		} catch (err: any) {
 			switch (err.bkErrorCode) {
 				case BkErrorCodes.InvalidBranchName:
 					window.showErrorMessage(localize('invalid branch name', 'Invalid branch name'));
@@ -2433,7 +2433,7 @@ export class CommandCenter {
 		if (pushOptions.pushType === PushType.Push) {
 			try {
 				await repository.push(repository.HEAD, forcePushMode);
-			} catch (err:any) {
+			} catch (err: any) {
 				if (err.bkErrorCode !== BkErrorCodes.NoUpstreamBranch) {
 					throw err;
 				}
@@ -2633,7 +2633,7 @@ export class CommandCenter {
 
 		try {
 			await this._sync(repository, rebase);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/Cancelled/i.test(err && (err.message || err.stderr || ''))) {
 				return;
 			}
@@ -2662,7 +2662,7 @@ export class CommandCenter {
 	async syncRebase(repository: Repository): Promise<void> {
 		try {
 			await this._sync(repository, true);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (/Cancelled/i.test(err && (err.message || err.stderr || ''))) {
 				return;
 			}
@@ -2792,23 +2792,23 @@ export class CommandCenter {
 	}
 
 	private async _stash(repository: Repository, includeUntracked = false): Promise<void> {
-		const noUnstagedChanges = repository.workingTreeGroup.resourceStates.length === 0
+		const noUncheckindChanges = repository.workingTreeGroup.resourceStates.length === 0
 			&& (!includeUntracked || repository.untrackedGroup.resourceStates.length === 0);
-		const noStagedChanges = repository.indexGroup.resourceStates.length === 0;
+		const noCheckedInChanges = repository.indexGroup.resourceStates.length === 0;
 
-		if (noUnstagedChanges && noStagedChanges) {
+		if (noUncheckindChanges && noCheckedInChanges) {
 			window.showInformationMessage(localize('no changes stash', "There are no changes to stash."));
 			return;
 		}
 
 		const config = workspace.getConfiguration('bk', Uri.file(repository.root));
-		const promptToSaveFilesBeforeStashing = config.get<'always' | 'staged' | 'never'>('promptToSaveFilesBeforeStash');
+		const promptToSaveFilesBeforeStashing = config.get<'always' | 'checkind' | 'never'>('promptToSaveFilesBeforeStash');
 
 		if (promptToSaveFilesBeforeStashing !== 'never') {
 			let documents = workspace.textDocuments
 				.filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
 
-			if (promptToSaveFilesBeforeStashing === 'staged' || repository.indexGroup.resourceStates.length > 0) {
+			if (promptToSaveFilesBeforeStashing === 'checkind' || repository.indexGroup.resourceStates.length > 0) {
 				documents = documents
 					.filter(d => repository.indexGroup.resourceStates.some(s => pathEquals(s.resourceUri.fsPath, d.uri.fsPath)));
 			}
@@ -2964,46 +2964,46 @@ export class CommandCenter {
 		return result && result.stash;
 	}
 
-	// @command('bk.timeline.openDiff', { repository: false })
-	// async timelineOpenDiff(item: TimelineItem, uri: Uri | undefined, _source: string) {
-	// 	const cmd = this.resolveTimelineOpenDiffCommand(
-	// 		item, uri,
-	// 		{
-	// 			preserveFocus: true,
-	// 			preview: true,
-	// 			viewColumn: ViewColumn.Active
-	// 		},
-	// 	);
-	// 	if (cmd === undefined) {
-	// 		return undefined;
-	// 	}
+	@command('bk.timeline.openDiff', { repository: false })
+	async timelineOpenDiff(item: TimelineItem, uri: Uri | undefined, _source: string) {
+		const cmd = this.resolveTimelineOpenDiffCommand(
+			item, uri,
+			{
+				preserveFocus: true,
+				preview: true,
+				viewColumn: ViewColumn.Active
+			},
+		);
+		if (cmd === undefined) {
+			return undefined;
+		}
 
-	// 	return commands.executeCommand(cmd.command, ...(cmd.arguments ?? []));
-	// }
+		return commands.executeCommand(cmd.command, ...(cmd.arguments ?? []));
+	}
 
-	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
-	// 	// if (uri === undefined || uri === null || !BkTimelineItem.is(item)) {
-	// 	// 	return undefined;
-	// 	// }
+	resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
+		if (uri === undefined || uri === null || !BkTimelineItem.is(item)) {
+			return undefined;
+		}
 
-	// 	const basename = path.basename(uri.fsPath);
+		const basename = path.basename(uri.fsPath);
 
-	// 	let title;
-	// 	if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
-	// 		title = localize('bk.title.workingTree', '{0} (Working Tree)', basename);
-	// 	}
-	// 	else if (item.previousRef === 'HEAD' && item.ref === '~') {
-	// 		title = localize('bk.title.index', '{0} (Index)', basename);
-	// 	} else {
-	// 		title = localize('bk.title.diffRefs', '{0} ({1}) ↔ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
-	// 	}
+		let title;
+		if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
+			title = localize('bk.title.workingTree', '{0} (Working Tree)', basename);
+		}
+		else if (item.previousRef === 'HEAD' && item.ref === '~') {
+			title = localize('bk.title.index', '{0} (Index)', basename);
+		} else {
+			title = localize('bk.title.diffRefs', '{0} ({1}) ↔ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
+		}
 
-	// 	return {
-	// 		command: 'vscode.diff',
-	// 		title: localize('bk.timeline.openDiffCommand', "Open Comparison"),
-	// 		arguments: [toBkUri(uri, item.previousRef), item.ref === '' ? uri : toBkUri(uri, item.ref), title, options]
-	// 	};
-	// }
+		return {
+			command: 'vscode.diff',
+			title: localize('bk.timeline.openDiffCommand', "Open Comparison"),
+			arguments: [toBkUri(uri, item.previousRef), item.ref === '' ? uri : toBkUri(uri, item.ref), title, options]
+		};
+	}
 
 	// @command('bk.timeline.copyCommitId', { repository: false })
 	// async timelineCopyCommitId(item: TimelineItem, _uri: Uri | undefined, _source: string) {
@@ -3304,7 +3304,7 @@ export class CommandCenter {
 			}
 
 			return result;
-		}, [] as { repository: Repository; resources: Uri[] }[]);
+		}, [] as { repository: Repository; resources: Uri[]; }[]);
 
 		const promises = groups
 			.map(({ repository, resources }) => fn(repository as Repository, isSingleResource ? resources[0] : resources));

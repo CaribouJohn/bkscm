@@ -11,6 +11,7 @@
     "contribEditorContentMenu",
     "contribViewsWelcome",
     "editSessionIdentityProvider",
+    "envShellEvent",
     "scmActionButton",
     "scmSelectedProvider",
     "scmValidation",
@@ -99,38 +100,38 @@
         "category": "Bk"
       },
       {
-        "command": "bk.stage",
-        "title": "%command.stage%",
+        "command": "bk.checkin",
+        "title": "%command.checkin%",
         "category": "Bk",
         "icon": "$(add)"
       },
       {
-        "command": "bk.stageAll",
-        "title": "%command.stageAll%",
+        "command": "bk.checkinAll",
+        "title": "%command.checkinAll%",
         "category": "Bk",
         "icon": "$(add)"
       },
       {
-        "command": "bk.stageAllTracked",
-        "title": "%command.stageAllTracked%",
+        "command": "bk.checkinAllTracked",
+        "title": "%command.checkinAllTracked%",
         "category": "Bk",
         "icon": "$(add)"
       },
       {
-        "command": "bk.stageAllUntracked",
-        "title": "%command.stageAllUntracked%",
+        "command": "bk.checkinAllUntracked",
+        "title": "%command.checkinAllUntracked%",
         "category": "Bk",
         "icon": "$(add)"
       },
       {
-        "command": "bk.stageAllMerge",
-        "title": "%command.stageAllMerge%",
+        "command": "bk.checkinAllMerge",
+        "title": "%command.checkinAllMerge%",
         "category": "Bk",
         "icon": "$(add)"
       },
       {
-        "command": "bk.stageSelectedRanges",
-        "title": "%command.stageSelectedRanges%",
+        "command": "bk.checkinSelectedRanges",
+        "title": "%command.checkinSelectedRanges%",
         "category": "Bk"
       },
       {
@@ -139,8 +140,8 @@
         "category": "Bk"
       },
       {
-        "command": "bk.stageChange",
-        "title": "%command.stageChange%",
+        "command": "bk.checkinChange",
+        "title": "%command.checkinChange%",
         "category": "Bk",
         "icon": "$(add)"
       },
@@ -149,23 +150,6 @@
         "title": "%command.revertChange%",
         "category": "Bk",
         "icon": "$(discard)"
-      },
-      {
-        "command": "bk.unstage",
-        "title": "%command.unstage%",
-        "category": "Bk",
-        "icon": "$(remove)"
-      },
-      {
-        "command": "bk.unstageAll",
-        "title": "%command.unstageAll%",
-        "category": "Bk",
-        "icon": "$(remove)"
-      },
-      {
-        "command": "bk.unstageSelectedRanges",
-        "title": "%command.unstageSelectedRanges%",
-        "category": "Bk"
       },
       {
         "command": "bk.clean",
@@ -205,8 +189,8 @@
         "enablement": "!commitInProgress"
       },
       {
-        "command": "bk.commitStaged",
-        "title": "%command.commitStaged%",
+        "command": "bk.pushCheckedIn",
+        "title": "%command.pushCheckedIn%",
         "category": "Bk",
         "enablement": "!commitInProgress"
       },
@@ -217,14 +201,14 @@
         "enablement": "!commitInProgress"
       },
       {
-        "command": "bk.commitStagedSigned",
-        "title": "%command.commitStagedSigned%",
+        "command": "bk.pushCheckedInSigned",
+        "title": "%command.pushCheckedInSigned%",
         "category": "Bk",
         "enablement": "!commitInProgress"
       },
       {
-        "command": "bk.commitStagedAmend",
-        "title": "%command.commitStagedAmend%",
+        "command": "bk.pushCheckedInAmend",
+        "title": "%command.pushCheckedInAmend%",
         "category": "Bk",
         "enablement": "!commitInProgress"
       },
@@ -254,8 +238,8 @@
         "enablement": "!commitInProgress"
       },
       {
-        "command": "bk.commitStagedNoVerify",
-        "title": "%command.commitStagedNoVerify%",
+        "command": "bk.pushCheckedInNoVerify",
+        "title": "%command.pushCheckedInNoVerify%",
         "category": "Bk",
         "enablement": "!commitInProgress"
       },
@@ -266,14 +250,14 @@
         "enablement": "!commitInProgress"
       },
       {
-        "command": "bk.commitStagedSignedNoVerify",
-        "title": "%command.commitStagedSignedNoVerify%",
+        "command": "bk.pushCheckedInSignedNoVerify",
+        "title": "%command.pushCheckedInSignedNoVerify%",
         "category": "Bk",
         "enablement": "!commitInProgress"
       },
       {
-        "command": "bk.commitStagedAmendNoVerify",
-        "title": "%command.commitStagedAmendNoVerify%",
+        "command": "bk.pushCheckedInAmendNoVerify",
+        "title": "%command.pushCheckedInAmendNoVerify%",
         "category": "Bk",
         "enablement": "!commitInProgress"
       },
@@ -610,15 +594,9 @@
     ],
     "keybindings": [
       {
-        "command": "bk.stageSelectedRanges",
+        "command": "bk.checkinSelectedRanges",
         "key": "ctrl+k ctrl+alt+s",
         "mac": "cmd+k cmd+alt+s",
-        "when": "isInDiffEditor"
-      },
-      {
-        "command": "bk.unstageSelectedRanges",
-        "key": "ctrl+k ctrl+n",
-        "mac": "cmd+k cmd+n",
         "when": "isInDiffEditor"
       },
       {
@@ -671,31 +649,31 @@
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stageAll",
+          "command": "bk.checkinAll",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stageAllTracked",
+          "command": "bk.checkinAllTracked",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stageAllUntracked",
+          "command": "bk.checkinAllUntracked",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stageAllMerge",
+          "command": "bk.checkinAllMerge",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stageSelectedRanges",
+          "command": "bk.checkinSelectedRanges",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.stageChange",
+          "command": "bk.checkinChange",
           "when": "false"
         },
         {
@@ -709,18 +687,6 @@
         {
           "command": "bk.openFile2",
           "when": "false"
-        },
-        {
-          "command": "bk.unstage",
-          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
-        },
-        {
-          "command": "bk.unstageAll",
-          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
-        },
-        {
-          "command": "bk.unstageSelectedRanges",
-          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
           "command": "bk.clean",
@@ -747,7 +713,7 @@
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.commitStaged",
+          "command": "bk.pushCheckedIn",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
@@ -755,11 +721,11 @@
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.commitStagedSigned",
+          "command": "bk.pushCheckedInSigned",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.commitStagedAmend",
+          "command": "bk.pushCheckedInAmend",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0"
         },
         {
@@ -783,7 +749,7 @@
           "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.commitStagedNoVerify",
+          "command": "bk.pushCheckedInNoVerify",
           "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
         },
         {
@@ -791,11 +757,11 @@
           "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.commitStagedSignedNoVerify",
+          "command": "bk.pushCheckedInSignedNoVerify",
           "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
         },
         {
-          "command": "bk.commitStagedAmendNoVerify",
+          "command": "bk.pushCheckedInAmendNoVerify",
           "when": "config.bk.enabled && !bk.missing && config.bk.allowNoVerifyCommit && bkOpenRepositoryCount != 0"
         },
         {
@@ -1121,23 +1087,13 @@
       ],
       "scm/resourceGroup/context": [
         {
-          "command": "bk.stageAllMerge",
+          "command": "bk.checkinAllMerge",
           "when": "scmProvider == bk && scmResourceGroup == merge",
           "group": "1_modification"
         },
         {
-          "command": "bk.stageAllMerge",
+          "command": "bk.checkinAllMerge",
           "when": "scmProvider == bk && scmResourceGroup == merge",
-          "group": "inline@2"
-        },
-        {
-          "command": "bk.unstageAll",
-          "when": "scmProvider == bk && scmResourceGroup == index",
-          "group": "1_modification"
-        },
-        {
-          "command": "bk.unstageAll",
-          "when": "scmProvider == bk && scmResourceGroup == index",
           "group": "inline@2"
         },
         {
@@ -1146,7 +1102,7 @@
           "group": "1_modification"
         },
         {
-          "command": "bk.stageAll",
+          "command": "bk.checkinAll",
           "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges == mixed",
           "group": "1_modification"
         },
@@ -1156,7 +1112,7 @@
           "group": "inline@2"
         },
         {
-          "command": "bk.stageAll",
+          "command": "bk.checkinAll",
           "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges == mixed",
           "group": "inline@2"
         },
@@ -1166,7 +1122,7 @@
           "group": "1_modification"
         },
         {
-          "command": "bk.stageAllTracked",
+          "command": "bk.checkinAllTracked",
           "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges != mixed",
           "group": "1_modification"
         },
@@ -1176,7 +1132,7 @@
           "group": "inline@2"
         },
         {
-          "command": "bk.stageAllTracked",
+          "command": "bk.checkinAllTracked",
           "when": "scmProvider == bk && scmResourceGroup == workingTree && config.bk.untrackedChanges != mixed",
           "group": "inline@2"
         },
@@ -1186,7 +1142,7 @@
           "group": "1_modification"
         },
         {
-          "command": "bk.stageAllUntracked",
+          "command": "bk.checkinAllUntracked",
           "when": "scmProvider == bk && scmResourceGroup == untracked",
           "group": "1_modification"
         },
@@ -1196,34 +1152,24 @@
           "group": "inline@2"
         },
         {
-          "command": "bk.stageAllUntracked",
+          "command": "bk.checkinAllUntracked",
           "when": "scmProvider == bk && scmResourceGroup == untracked",
           "group": "inline@2"
         }
       ],
       "scm/resourceFolder/context": [
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == merge",
           "group": "1_modification"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == merge",
           "group": "inline@2"
         },
         {
-          "command": "bk.unstage",
-          "when": "scmProvider == bk && scmResourceGroup == index",
-          "group": "1_modification"
-        },
-        {
-          "command": "bk.unstage",
-          "when": "scmProvider == bk && scmResourceGroup == index",
-          "group": "inline@2"
-        },
-        {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == workingTree",
           "group": "1_modification"
         },
@@ -1238,7 +1184,7 @@
           "group": "inline@2"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == workingTree",
           "group": "inline@2"
         },
@@ -1248,12 +1194,12 @@
           "group": "1_modification@3"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == untracked",
           "group": "1_modification"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == untracked",
           "group": "inline@2"
         },
@@ -1275,7 +1221,7 @@
       ],
       "scm/resourceState/context": [
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == merge",
           "group": "1_modification"
         },
@@ -1285,7 +1231,7 @@
           "group": "navigation"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == merge",
           "group": "inline@2"
         },
@@ -1335,16 +1281,6 @@
           "group": "navigation"
         },
         {
-          "command": "bk.unstage",
-          "when": "scmProvider == bk && scmResourceGroup == index",
-          "group": "1_modification"
-        },
-        {
-          "command": "bk.unstage",
-          "when": "scmProvider == bk && scmResourceGroup == index",
-          "group": "inline@2"
-        },
-        {
           "command": "bk.revealInExplorer",
           "when": "scmProvider == bk && scmResourceGroup == index",
           "group": "2_view@1"
@@ -1390,7 +1326,7 @@
           "group": "navigation"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == workingTree",
           "group": "1_modification"
         },
@@ -1405,7 +1341,7 @@
           "group": "inline@2"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == workingTree",
           "group": "inline@2"
         },
@@ -1460,7 +1396,7 @@
           "group": "navigation"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == untracked",
           "group": "1_modification"
         },
@@ -1475,7 +1411,7 @@
           "group": "inline@2"
         },
         {
-          "command": "bk.stage",
+          "command": "bk.checkin",
           "when": "scmProvider == bk && scmResourceGroup == untracked",
           "group": "inline@2"
         },
@@ -1522,13 +1458,8 @@
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && editorLangId == bk-commit && commitInProgress"
         },
         {
-          "command": "bk.stageSelectedRanges",
+          "command": "bk.checkinSelectedRanges",
           "group": "2_bk@1",
-          "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
-        },
-        {
-          "command": "bk.unstageSelectedRanges",
-          "group": "2_bk@2",
           "when": "config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
         },
         {
@@ -1539,13 +1470,8 @@
       ],
       "editor/context": [
         {
-          "command": "bk.stageSelectedRanges",
+          "command": "bk.checkinSelectedRanges",
           "group": "2_bk@1",
-          "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
-        },
-        {
-          "command": "bk.unstageSelectedRanges",
-          "group": "2_bk@2",
           "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
         },
         {
@@ -1577,7 +1503,7 @@
       ],
       "scm/change/title": [
         {
-          "command": "bk.stageChange",
+          "command": "bk.checkinChange",
           "when": "config.bk.enabled && !bk.missing && originalResourceScheme == bk"
         },
         {
@@ -1618,7 +1544,7 @@
           "group": "1_commit@1"
         },
         {
-          "command": "bk.commitStaged",
+          "command": "bk.pushCheckedIn",
           "group": "1_commit@2"
         },
         {
@@ -1639,7 +1565,7 @@
           "when": "config.bk.allowNoVerifyCommit"
         },
         {
-          "command": "bk.commitStagedNoVerify",
+          "command": "bk.pushCheckedInNoVerify",
           "group": "1_commit@7",
           "when": "config.bk.allowNoVerifyCommit"
         },
@@ -1649,7 +1575,7 @@
           "when": "config.bk.allowNoVerifyCommit"
         },
         {
-          "command": "bk.commitStagedAmend",
+          "command": "bk.pushCheckedInAmend",
           "group": "2_amend@1"
         },
         {
@@ -1657,7 +1583,7 @@
           "group": "2_amend@2"
         },
         {
-          "command": "bk.commitStagedAmendNoVerify",
+          "command": "bk.pushCheckedInAmendNoVerify",
           "group": "2_amend@3",
           "when": "config.bk.allowNoVerifyCommit"
         },
@@ -1667,7 +1593,7 @@
           "when": "config.bk.allowNoVerifyCommit"
         },
         {
-          "command": "bk.commitStagedSigned",
+          "command": "bk.pushCheckedInSigned",
           "group": "3_signoff@1"
         },
         {
@@ -1675,7 +1601,7 @@
           "group": "3_signoff@2"
         },
         {
-          "command": "bk.commitStagedSignedNoVerify",
+          "command": "bk.pushCheckedInSignedNoVerify",
           "group": "3_signoff@3",
           "when": "config.bk.allowNoVerifyCommit"
         },
@@ -1687,12 +1613,8 @@
       ],
       "bk.changes": [
         {
-          "command": "bk.stageAll",
+          "command": "bk.checkinAll",
           "group": "changes@1"
-        },
-        {
-          "command": "bk.unstageAll",
-          "group": "changes@2"
         },
         {
           "command": "bk.cleanAll",
@@ -2155,12 +2077,12 @@
           "type": "string",
           "enum": [
             "always",
-            "staged",
+            "checkind",
             "never"
           ],
           "enumDescriptions": [
             "%config.promptToSaveFilesBeforeStash.always%",
-            "%config.promptToSaveFilesBeforeStash.staged%",
+            "%config.promptToSaveFilesBeforeStash.checkind%",
             "%config.promptToSaveFilesBeforeStash.never%"
           ],
           "scope": "resource",
@@ -2171,12 +2093,12 @@
           "type": "string",
           "enum": [
             "always",
-            "staged",
+            "checkind",
             "never"
           ],
           "enumDescriptions": [
             "%config.promptToSaveFilesBeforeCommit.always%",
-            "%config.promptToSaveFilesBeforeCommit.staged%",
+            "%config.promptToSaveFilesBeforeCommit.checkind%",
             "%config.promptToSaveFilesBeforeCommit.never%"
           ],
           "scope": "resource",
@@ -2267,11 +2189,11 @@
           "default": 10,
           "description": "%config.detectSubmodulesLimit%"
         },
-        "bk.alwaysShowStagedChangesResourceGroup": {
+        "bk.alwaysShowCheckedInChangesResourceGroup": {
           "type": "boolean",
           "scope": "resource",
           "default": false,
-          "description": "%config.alwaysShowStagedChangesResourceGroup%"
+          "description": "%config.alwaysShowCheckedInChangesResourceGroup%"
         },
         "bk.alwaysSignOff": {
           "type": "boolean",
@@ -2619,8 +2541,8 @@
         }
       },
       {
-        "id": "bkDecoration.stageModifiedResourceForeground",
-        "description": "%colors.stageModified%",
+        "id": "bkDecoration.checkinModifiedResourceForeground",
+        "description": "%colors.checkinModified%",
         "defaults": {
           "light": "#895503",
           "dark": "#E2C08D",
@@ -2629,8 +2551,8 @@
         }
       },
       {
-        "id": "bkDecoration.stageDeletedResourceForeground",
-        "description": "%colors.stageDeleted%",
+        "id": "bkDecoration.checkinDeletedResourceForeground",
+        "description": "%colors.checkinDeleted%",
         "defaults": {
           "light": "#ad0707",
           "dark": "#c74e39",

@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as picomatch from 'picomatch';
-import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox,  SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands, Tab, TabInputTextDiff, TabInputNotebookDiff, RelativePattern } from 'vscode';
+import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands, Tab, TabInputTextDiff, TabInputNotebookDiff, RelativePattern } from 'vscode';
 import * as nls from 'vscode-nls';
 import { Branch, Change, ForcePushMode, BkErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, FetchOptions } from './api/bk';
 // import { AutoFetcher } from './autofetch';
@@ -219,11 +219,11 @@ export class Resource implements SourceControlResourceState {
 	get color(): ThemeColor {
 		switch (this.type) {
 			case Status.INDEX_MODIFIED:
-				return new ThemeColor('bkDecoration.stageModifiedResourceForeground');
+				return new ThemeColor('bkDecoration.checkinModifiedResourceForeground');
 			case Status.MODIFIED:
 				return new ThemeColor('bkDecoration.modifiedResourceForeground');
 			case Status.INDEX_DELETED:
-				return new ThemeColor('bkDecoration.stageDeletedResourceForeground');
+				return new ThemeColor('bkDecoration.checkinDeletedResourceForeground');
 			case Status.DELETED:
 				return new ThemeColor('bkDecoration.deletedResourceForeground');
 			case Status.INDEX_ADDED:
@@ -330,7 +330,7 @@ export const enum Operation {
 	CherryPick = 'CherryPick',
 	Sync = 'Sync',
 	Show = 'Show',
-	Stage = 'Stage',
+	CheckIn = 'Check In',
 	GetCommitTemplate = 'GetCommitTemplate',
 	DeleteBranch = 'DeleteBranch',
 	RenameBranch = 'RenameBranch',
@@ -583,7 +583,7 @@ class DotBkWatcher implements IFileWatcher {
 			const upstreamWatcher = watch(upstreamPath);
 			this.transientDisposables.push(upstreamWatcher);
 			upstreamWatcher.event(this.emitter.fire, this.emitter, this.transientDisposables);
-		} catch (err:any) {
+		} catch (err: any) {
 			this.outputChannelLogger.logWarning(`Failed to watch ref '${upstreamPath}', is most likely packed.`);
 		}
 	}
@@ -863,11 +863,11 @@ export class Repository implements Disposable {
 		return this.repository.root;
 	}
 
-	get dotBk(): { path: string; commonPath?: string } {
+	get dotBk(): { path: string; commonPath?: string; } {
 		return this.repository.dotBk;
 	}
 
-	private isRepositoryHuge: false | { limit: number } = false;
+	private isRepositoryHuge: false | { limit: number; } = false;
 	private didWarnAboutLimit = false;
 
 	private isBranchProtectedMatcher: picomatch.Matcher | undefined;
@@ -895,7 +895,7 @@ export class Repository implements Disposable {
 			const dotBkFileWatcher = new DotBkWatcher(this, outputChannelLogger);
 			onRepositoryDotBkFileChange = dotBkFileWatcher.event;
 			this.disposables.push(dotBkFileWatcher);
-		} catch (err:any) {
+		} catch (err: any) {
 			outputChannelLogger.logError(`Failed to watch path:'${this.dotBk.path}' or commonPath:'${this.dotBk.commonPath}', reverting to legacy API file watched. Some events might be lost.\n${err.stack || err}`);
 
 			onRepositoryDotBkFileChange = filterEvent(onRepositoryFileChange, uri => /\.bk($|\/)/.test(uri.path));
@@ -924,16 +924,16 @@ export class Repository implements Disposable {
 		this.disposables.push(this.onDidRunBkStatus(() => this.updateInputBoxPlaceholder()));
 
 		this._mergeGroup = this._sourceControl.createResourceGroup('merge', localize('merge changes', "Merge Changes"));
-		this._indexGroup = this._sourceControl.createResourceGroup('index', localize('staged changes', "Staged Changes"));
+		this._indexGroup = this._sourceControl.createResourceGroup('index', localize('checkind changes', "CheckedIn Changes"));
 		this._workingTreeGroup = this._sourceControl.createResourceGroup('workingTree', localize('changes', "Changes"));
 		this._untrackedGroup = this._sourceControl.createResourceGroup('untracked', localize('untracked changes', "Untracked Changes"));
 
 		const updateIndexGroupVisibility = () => {
 			const config = workspace.getConfiguration('bk', root);
-			this.indexGroup.hideWhenEmpty = !config.get<boolean>('alwaysShowStagedChangesResourceGroup');
+			this.indexGroup.hideWhenEmpty = !config.get<boolean>('alwaysShowCheckedInChangesResourceGroup');
 		};
 
-		const onConfigListener = filterEvent(workspace.onDidChangeConfiguration, e => e.affectsConfiguration('bk.alwaysShowStagedChangesResourceGroup', root));
+		const onConfigListener = filterEvent(workspace.onDidChangeConfiguration, e => e.affectsConfiguration('bk.alwaysShowCheckedInChangesResourceGroup', root));
 		onConfigListener(updateIndexGroupVisibility, this, this.disposables);
 		updateIndexGroupVisibility();
 
@@ -1113,7 +1113,7 @@ export class Repository implements Disposable {
 		return "";
 	}
 
-	getConfigs(): Promise<{ key: string; value: string }[]> {
+	getConfigs(): Promise<{ key: string; value: string; }[]> {
 		return this.run(Operation.Config, () => this.repository.getConfigs('local'));
 	}
 
@@ -1194,7 +1194,7 @@ export class Repository implements Disposable {
 		return this.run(Operation.HashObject, () => this.repository.hashObject(data));
 	}
 
-	async add(resources: Uri[], opts?: { update?: boolean }): Promise<void> {
+	async add(resources: Uri[], opts?: { update?: boolean; }): Promise<void> {
 		await this.run(Operation.Add, async () => {
 			await this.repository.add(resources.map(r => r.fsPath), opts);
 			this.closeDiffEditors([], [...resources.map(r => r.fsPath)]);
@@ -1205,10 +1205,10 @@ export class Repository implements Disposable {
 		await this.run(Operation.Remove, () => this.repository.rm(resources.map(r => r.fsPath)));
 	}
 
-	async stage(resource: Uri, contents: string): Promise<void> {
+	async checkin(resource: Uri, contents: string): Promise<void> {
 		const path = relativePath(this.repository.root, resource.fsPath).replace(/\\/g, '/');
-		await this.run(Operation.Stage, async () => {
-			await this.repository.stage(path, contents);
+		await this.run(Operation.CheckIn, async () => {
+			await this.repository.checkin(path, contents);
 			this.closeDiffEditors([], [...resource.fsPath]);
 		});
 		this._onDidChangeOriginalResource.fire(resource);
@@ -1239,25 +1239,25 @@ export class Repository implements Disposable {
 		// 		this.closeDiffEditors(indexResources, workingGroupResources);
 		// 	});
 		// } else {
-			await this.run(Operation.Commit, async () => {
-				if (opts.all) {
-					const addOpts = opts.all === 'tracked' ? { update: true } : {};
-					await this.repository.add([], addOpts);
-				}
+		await this.run(Operation.Commit, async () => {
+			if (opts.all) {
+				const addOpts = opts.all === 'tracked' ? { update: true } : {};
+				await this.repository.add([], addOpts);
+			}
 
-				delete opts.all;
+			delete opts.all;
 
-				if (opts.requireUserConfig === undefined || opts.requireUserConfig === null) {
-					const config = workspace.getConfiguration('bk', Uri.file(this.root));
-					opts.requireUserConfig = config.get<boolean>('requireBkUserConfig');
-				}
+			if (opts.requireUserConfig === undefined || opts.requireUserConfig === null) {
+				const config = workspace.getConfiguration('bk', Uri.file(this.root));
+				opts.requireUserConfig = config.get<boolean>('requireBkUserConfig');
+			}
 
-				await this.repository.commit(message, opts);
-				this.closeDiffEditors(indexResources, workingGroupResources);
-			});
+			await this.repository.commit(message, opts);
+			this.closeDiffEditors(indexResources, workingGroupResources);
+		});
 
-			// Execute post-commit command
-			//await this.commitCommandCenter.executePostCommitCommand(opts.postCommitCommand);
+		// Execute post-commit command
+		//await this.commitCommandCenter.executePostCommitCommand(opts.postCommitCommand);
 		//}
 	}
 
@@ -1377,11 +1377,11 @@ export class Repository implements Disposable {
 		await this.run(Operation.DeleteTag, () => this.repository.deleteTag(name));
 	}
 
-	async checkout(treeish: string, opts?: { detached?: boolean }): Promise<void> {
+	async checkout(treeish: string, opts?: { detached?: boolean; }): Promise<void> {
 		await this.run(Operation.Checkout, () => this.repository.checkout(treeish, [], opts));
 	}
 
-	async checkoutTracking(treeish: string, opts: { detached?: boolean } = {}): Promise<void> {
+	async checkoutTracking(treeish: string, opts: { detached?: boolean; } = {}): Promise<void> {
 		await this.run(Operation.CheckoutTracking, () => this.repository.checkout(treeish, [], { ...opts, track: true }));
 	}
 
@@ -1414,7 +1414,7 @@ export class Repository implements Disposable {
 	}
 
 	@throttle
-	async fetchDefault(options: { silent?: boolean } = {}): Promise<void> {
+	async fetchDefault(options: { silent?: boolean; } = {}): Promise<void> {
 		await this._fetch({ silent: options.silent });
 	}
 
@@ -1432,7 +1432,7 @@ export class Repository implements Disposable {
 		await this._fetch(options);
 	}
 
-	private async _fetch(options: { remote?: string; ref?: string; all?: boolean; prune?: boolean; depth?: number; silent?: boolean; cancellationToken?: CancellationToken } = {}): Promise<void> {
+	private async _fetch(options: { remote?: string; ref?: string; all?: boolean; prune?: boolean; depth?: number; silent?: boolean; cancellationToken?: CancellationToken; } = {}): Promise<void> {
 		if (!options.prune) {
 			const config = workspace.getConfiguration('bk', Uri.file(this.root));
 			const prune = config.get<boolean>('pruneOnFetch');
@@ -1635,7 +1635,7 @@ export class Repository implements Disposable {
 
 			try {
 				return await this.repository.bufferString(`${ref}:${path}`, defaultEncoding, autoGuessEncoding);
-			} catch (err:any) {
+			} catch (err: any) {
 				if (err.bkErrorCode === BkErrorCodes.WrongCase) {
 					const bkRelativePath = await this.repository.getBkRelativePath(ref, path);
 					return await this.repository.bufferString(`${ref}:${bkRelativePath}`, defaultEncoding, autoGuessEncoding);
@@ -1653,11 +1653,11 @@ export class Repository implements Disposable {
 		});
 	}
 
-	getObjectDetails(ref: string, filePath: string): Promise<{ mode: string; object: string; size: number }> {
+	getObjectDetails(ref: string, filePath: string): Promise<{ mode: string; object: string; size: number; }> {
 		return this.run(Operation.GetObjectDetails, () => this.repository.getObjectDetails(ref, filePath));
 	}
 
-	detectObjectType(object: string): Promise<{ mimetype: string; encoding?: string }> {
+	detectObjectType(object: string): Promise<{ mimetype: string; encoding?: string; }> {
 		return this.run(Operation.Show, () => this.repository.detectObjectType(object));
 	}
 
@@ -1794,7 +1794,7 @@ export class Repository implements Disposable {
 	private async _push(remote?: string, refspec?: string, setUpstream: boolean = false, followTags = false, forcePushMode?: ForcePushMode, tags = false): Promise<void> {
 		try {
 			await this.repository.push(remote, refspec, setUpstream, followTags, forcePushMode, tags);
-		} catch (err:any) {
+		} catch (err: any) {
 			if (!remote || !refspec) {
 				throw err;
 			}
@@ -1834,7 +1834,7 @@ export class Repository implements Disposable {
 			}
 
 			return result;
-		} catch (err:any) {
+		} catch (err: any) {
 			error = err;
 
 			if (err.bkErrorCode === BkErrorCodes.NotABkRepository) {
@@ -1855,7 +1855,7 @@ export class Repository implements Disposable {
 			try {
 				attempt++;
 				return await runOperation();
-			} catch (err:any) {
+			} catch (err: any) {
 				const shouldRetry = attempt <= 10 && (
 					(err.bkErrorCode === BkErrorCodes.RepositoryIsLocked)
 					|| ((operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch) && (err.bkErrorCode === BkErrorCodes.CantLockRef || err.bkErrorCode === BkErrorCodes.CantRebaseMultipleBranches))
@@ -1983,7 +1983,7 @@ export class Repository implements Disposable {
 			// 		// noop
 			// 	}
 			// }
-		} catch (err:any) {
+		} catch (err: any) {
 			// noop
 		}
 
@@ -2005,24 +2005,24 @@ export class Repository implements Disposable {
 		const untracked: Resource[] = [];
 
 
-// d------(-d) a directory containing BitKeeper files;
-// D------(-D) a  directory  containing  no BitKeeper files(but may
-//                          have subdirectories with BitKeeper files).
-// i------(-i) a file that is extra but is normally ignored;
-// j------(-j) extra file under / dir;
-// R------(-R) the file is a sub - repository root(overrides - d);
-// s------(-s) a file that is under BitKeeper control;
-// x------(-x) a file that is not under BitKeeper control;
-// sl----- (-l) a BitKeeper file that is locked;
-// su----- (-u) a BitKeeper file that is not locked;
-// slc----(-c) a BitKeeper file that is  locked  and  modified(aka
-//                          changed);
-// s--p-- - (-p) a BitKeeper file that has one or more pending deltas;
-// s-- - G-- (-G) a BitKeeper file that is checked out(aka gotten);
-// s----n - (-n) a BitKeeper file that is not in its recorded location;
-// s----- y(-y) a BitKeeper file that has saved checkin comments;
-// x----- y(-y) an extra file that has saved checkin comments
-		
+		// d------(-d) a directory containing BitKeeper files;
+		// D------(-D) a  directory  containing  no BitKeeper files(but may
+		//                          have subdirectories with BitKeeper files).
+		// i------(-i) a file that is extra but is normally ignored;
+		// j------(-j) extra file under / dir;
+		// R------(-R) the file is a sub - repository root(overrides - d);
+		// s------(-s) a file that is under BitKeeper control;
+		// x------(-x) a file that is not under BitKeeper control;
+		// sl----- (-l) a BitKeeper file that is locked;
+		// su----- (-u) a BitKeeper file that is not locked;
+		// slc----(-c) a BitKeeper file that is  locked  and  modified(aka
+		//                          changed);
+		// s--p-- - (-p) a BitKeeper file that has one or more pending deltas;
+		// s-- - G-- (-G) a BitKeeper file that is checked out(aka gotten);
+		// s----n - (-n) a BitKeeper file that is not in its recorded location;
+		// s----- y(-y) a BitKeeper file that has saved checkin comments;
+		// x----- y(-y) an extra file that has saved checkin comments
+
 		status.forEach(raw => {
 			const uri = Uri.file(path.join(this.repository.root, raw.path));
 			// const renameUri = raw.rename
@@ -2046,7 +2046,7 @@ export class Repository implements Disposable {
 			// 		// case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
 			// 		// case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.UNTRACKED, useIcons));
 			// 		// default: return undefined;
-			// 		default: 
+			// 		default:
 			// 	}
 			// 	case 'DD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_DELETED, useIcons));
 			// 	case 'AU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_US, useIcons));
