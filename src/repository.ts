@@ -1646,10 +1646,11 @@ export class Repository implements Disposable {
 		});
 	}
 
-	async buffer(ref: string, filePath: string): Promise<Buffer> {
+	async buffer(_ref: string, filePath: string): Promise<Buffer> {
 		return this.run(Operation.Show, () => {
 			const path = relativePath(this.repository.root, filePath).replace(/\\/g, '/');
-			return this.repository.buffer(`${ref}:${path}`);
+			return this.repository.buffer(`${path}`);
+			//return this.repository.buffer(`${ref}:${path}`);
 		});
 	}
 
@@ -2034,8 +2035,12 @@ export class Repository implements Disposable {
 			//let _remainder = raw.bitkeeper.substring(6);
 
 			if (lhs !== "x--") {
-				if (lhs === "slc" || lhs === "sl-" || rhs === "p--" || rhs === 'pG-') {
+				//locked and modified
+				if (lhs === "slc") {
 					return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons));
+				}
+				if (lhs[0] === 's' && rhs[0] === 'p') {
+					return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_MODIFIED, useIcons));
 				}
 			} else {
 				return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));

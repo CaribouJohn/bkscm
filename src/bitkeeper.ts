@@ -15,7 +15,7 @@ import * as filetype from 'file-type';
 import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions, isWindows } from './util';
 import { CancellationToken, ConfigurationChangeEvent, Progress, Uri, workspace } from 'vscode';
 import { detectEncoding } from './encoding';
-import { Ref, RefType, ForcePushMode, BkErrorCodes, LogOptions, Change, Status, CommitOptions } from './api/bk';
+import { Ref, RefType, ForcePushMode, BkErrorCodes, LogOptions, Change, Status, CommitOptions, Remote } from './api/bk';
 import * as byline from 'byline';
 import { StringDecoder } from 'string_decoder';
 
@@ -38,11 +38,11 @@ export interface Stash {
 	description: string;
 }
 
-// interface MutableRemote extends Remote {
-// 	fetchUrl?: string;
-// 	pushUrl?: string;
-// 	isReadOnly: boolean;
-// }
+interface MutableRemote extends Remote {
+	fetchUrl?: string;
+	pushUrl?: string;
+	isReadOnly: boolean;
+}
 
 // TODO@eamodio: Move to bk.d.ts once we are good with the api
 /**
@@ -1060,7 +1060,7 @@ export class Repository {
 	}
 
 	async buffer(object: string): Promise<Buffer> {
-		const child = this.stream(['show', '--textconv', object]);
+		const child = this.stream(['get', '-P', object]);
 
 		if (!child.stdout) {
 			return Promise.reject<Buffer>('Can\'t open file from bk');
@@ -1084,45 +1084,35 @@ export class Repository {
 		return stdout;
 	}
 
-	async getObjectDetails(treeish: string, path: string): Promise<{ mode: string; object: string; size: number; }> {
-		if (!treeish) { // index
-			const elements = await this.lsfiles(path);
-
-			if (elements.length === 0) {
-				throw new BkError({ message: 'Path not known by bk', bkErrorCode: BkErrorCodes.UnknownPath });
-			}
-
-			const { mode, object } = elements[0];
-			const catFile = await this.exec(['cat-file', '-s', object]);
-			const size = parseInt(catFile.stdout);
-
-			return { mode, object, size };
-		}
-
-		const elements = await this.lstree(treeish, path);
+	async getObjectDetails(_treeish: string, path: string): Promise<{ mode: string; object: string; size: number; }> {
+		const elements = await this.lsfiles(path);
 
 		if (elements.length === 0) {
 			throw new BkError({ message: 'Path not known by bk', bkErrorCode: BkErrorCodes.UnknownPath });
 		}
 
-		const { mode, object, size } = elements[0];
-		return { mode, object, size: parseInt(size) };
+		const { mode, object } = elements[0];
+		const catFile = await this.exec(['cat-file', '-s', object]);
+		const size = parseInt(catFile.stdout);
+
+		return { mode, object, size };
+
 	}
 
-	async lstree(treeish: string, path: string): Promise<LsTreeElement[]> {
-		const { stdout } = await this.exec(['ls-tree', '-l', treeish, '--', sanitizePath(path)]);
-		return parseLsTree(stdout);
-	}
+	// async lstree(treeish: string, path: string): Promise<LsTreeElement[]> {
+	// 	const { stdout } = await this.exec(['ls-tree', '-l', treeish, '--', sanitizePath(path)]);
+	// 	return parseLsTree(stdout);
+	// }
 
 	async lsfiles(path: string): Promise<LsFilesElement[]> {
-		const { stdout } = await this.exec(['ls-files', '--checkin', '--', sanitizePath(path)]);
+		const { stdout } = await this.exec(['-r', 'gfiles', '-0', '-cgxvp', '--', sanitizePath(path)]);
 		return parseLsFiles(stdout);
 	}
 
-	async getBkRelativePath(ref: string, relativePath: string): Promise<string> {
+	async getBkRelativePath(_ref: string, relativePath: string): Promise<string> {
 		const relativePathLowercase = relativePath.toLowerCase();
 		const dirname = path.posix.dirname(relativePath) + '/';
-		const elements: { file: string; }[] = ref ? await this.lstree(ref, dirname) : await this.lsfiles(dirname);
+		const elements: { file: string; }[] = await this.lsfiles(dirname);
 		const element = elements.filter(file => file.file.toLowerCase() === relativePathLowercase)[0];
 
 		if (!element) {
@@ -1369,14 +1359,8 @@ export class Repository {
 		return result.stdout.trim();
 	}
 
-	async add(paths: string[], opts?: { update?: boolean; }): Promise<void> {
-		const args = ['add'];
-
-		if (opts && opts.update) {
-			args.push('-u');
-		} else {
-			args.push('-A');
-		}
+	async add(paths: string[], _opts?: { update?: boolean; }): Promise<void> {
+		const args = ['delta', '-a'];
 
 		if (paths && paths.length) {
 			for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
@@ -1433,7 +1417,7 @@ export class Repository {
 	}
 
 	async checkout(_treeish: string, paths: string[], _opts: { track?: boolean; detached?: boolean; } = Object.create(null)): Promise<void> {
-		const args = ['pull','-q','-R'];
+		const args = ['pull', '-q', '-R'];
 
 		// if (opts.track) {
 		// 	args.push('--track');
@@ -2094,37 +2078,31 @@ export class Repository {
 		return rawStashes;
 	}
 
-	// async getRemotes(): Promise<Remote[]> {
-	// 	const result = await this.exec(['remote', '--verbose']);
-	// 	const lines = result.stdout.trim().split('\n').filter(l => !!l);
-	// 	const remotes: MutableRemote[] = [];
+	async getRemotes(): Promise<Remote[]> {
+		const result = await this.exec(['parent']);
+		const lines = result.stdout.trim().split('\n').filter(l => !!l);
+		const remotes: MutableRemote[] = [];
 
-	// 	for (const line of lines) {
-	// 		const parts = line.split(/\s/);
-	// 		const [name, url, type] = parts;
+		for (const line of lines) {
+			const parts = line.split(/\s/);
+			const [_name, _type, url] = parts;
 
-	// 		let remote = remotes.find(r => r.name === name);
+			let remote = remotes.find(r => r.name === url);
 
-	// 		if (!remote) {
-	// 			remote = { name, isReadOnly: false };
-	// 			remotes.push(remote);
-	// 		}
+			if (!remote) {
+				remote = { name: url, isReadOnly: false };
+				remotes.push(remote);
+			}
 
-	// 		if (/fetch/i.test(type)) {
-	// 			remote.fetchUrl = url;
-	// 		} else if (/push/i.test(type)) {
-	// 			remote.pushUrl = url;
-	// 		} else {
-	// 			remote.fetchUrl = url;
-	// 			remote.pushUrl = url;
-	// 		}
+			remote.fetchUrl = url;
+			remote.pushUrl = url;
 
-	// 		// https://bkhub.com/microsoft/vscode/issues/45271
-	// 		remote.isReadOnly = remote.pushUrl === undefined || remote.pushUrl === 'no_push';
-	// 	}
+			// https://bkhub.com/microsoft/vscode/issues/45271
+			remote.isReadOnly = remote.pushUrl === undefined || remote.pushUrl === 'no_push';
+		}
 
-	// 	return remotes;
-	// }
+		return remotes;
+	}
 
 	// async getBranch(name: string): Promise<Branch> {
 	// 	if (name === 'HEAD') {
