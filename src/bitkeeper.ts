@@ -457,7 +457,7 @@ export class Bk {
 			}
 			await this.exec(options.parentPath, command, {
 				cancellationToken,
-				env: { 'GIT_HTTP_USER_AGENT': this.userAgent },
+				env: { 'BK_HTTP_USER_AGENT': this.userAgent },
 				onSpawn,
 			});
 		} catch (err: any) {
@@ -620,10 +620,10 @@ export class Bk {
 		}
 
 		options.env = assign({}, process.env, this.env, options.env || {}, {
-			VSCODE_GIT_COMMAND: args[0],
+			VSCODE_BK_COMMAND: args[0],
 			LC_ALL: 'en_US.UTF-8',
 			LANG: 'en_US.UTF-8',
-			GIT_PAGER: 'cat'
+			BK_PAGER: 'cat'
 		});
 
 		const cwd = this.getCwd(options);
@@ -1519,7 +1519,7 @@ export class Repository {
 		const args = ['rebase', '--continue'];
 
 		try {
-			await this.exec(args, { env: { GIT_EDITOR: 'true' } });
+			await this.exec(args, { env: { BK_EDITOR: 'true' } });
 		} catch (commitErr) {
 			await this.handleCommitError(commitErr);
 		}
@@ -1702,7 +1702,7 @@ export class Repository {
 		const args = ['fetch'];
 		const spawnOptions: SpawnOptions = {
 			cancellationToken: options.cancellationToken,
-			env: { 'GIT_HTTP_USER_AGENT': this.bk.userAgent }
+			env: { 'BK_HTTP_USER_AGENT': this.bk.userAgent }
 		};
 
 		if (options.remote) {
@@ -1724,7 +1724,7 @@ export class Repository {
 		}
 
 		if (options.silent) {
-			spawnOptions.env!['VSCODE_GIT_FETCH_SILENT'] = 'true';
+			spawnOptions.env!['VSCODE_BK_FETCH_SILENT'] = 'true';
 		}
 
 		try {
@@ -1763,7 +1763,7 @@ export class Repository {
 		try {
 			await this.exec(args, {
 				cancellationToken: options.cancellationToken,
-				env: { 'GIT_HTTP_USER_AGENT': this.bk.userAgent }
+				env: { 'BK_HTTP_USER_AGENT': this.bk.userAgent }
 			});
 		} catch (err: any) {
 			if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || '')) {
@@ -1833,7 +1833,7 @@ export class Repository {
 		}
 
 		try {
-			await this.exec(args, { env: { 'GIT_HTTP_USER_AGENT': this.bk.userAgent } });
+			await this.exec(args, { env: { 'BK_HTTP_USER_AGENT': this.bk.userAgent } });
 		} catch (err: any) {
 			if (/^error: failed to push some refs to\b/m.test(err.stderr || '')) {
 				err.bkErrorCode = BkErrorCodes.PushRejected;
@@ -1944,7 +1944,7 @@ export class Repository {
 	getStatus(opts?: { limit?: number; ignoreSubmodules?: boolean; untrackedChanges?: 'mixed' | 'separate' | 'hidden'; }): Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean; }> {
 		return new Promise<{ status: IFileStatus[]; statusLength: number; didHitLimit: boolean; }>((c, e) => {
 			const parser = new BkStatusParser();
-			const env = { GIT_OPTIONAL_LOCKS: '0' };
+			const env = { BK_OPTIONAL_LOCKS: '0' };
 			const args = ['gfiles', '-0', '-cgxvp'];
 
 			// if (opts?.untrackedChanges === 'hidden') {

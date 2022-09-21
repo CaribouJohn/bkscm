@@ -230,7 +230,7 @@
 	"config.experimental.installGuide": "Experimental improvements for the bk setup flow.",
 	"config.repositoryScanIgnoredFolders": "List of folders that are ignored while scanning for Bk repositories when `#bk.autoRepositoryDetection#` is set to `true` or `subFolders`.",
 	"config.repositoryScanMaxDepth": "Controls the depth used when scanning workspace folders for Bk repositories when `#bk.autoRepositoryDetection#` is set to `true` or `subFolders`. Can be set to `-1` for no limit.",
-	"config.useIntegratedAskPass": "Controls whether GIT_ASKPASS should be overwritten to use the integrated version.",
+	"config.useIntegratedAskPass": "Controls whether BK_ASKPASS should be overwritten to use the integrated version.",
 	"config.logLevel": {
 		"message": "Specifies how much information (if any) to log to the [bk output](command:bk.showOutput).",
 		"comment": [
