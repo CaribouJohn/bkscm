@@ -4,6 +4,9 @@
   "description": "SCM for bitkeeper",
   "version": "0.0.1",
   "publisher": "CaribouJohn",
+  "repository": {
+    "url": "https://github.com/CaribouJohn/bkscm"
+  },
   "engines": {
     "vscode": "^1.71.0"
   },
