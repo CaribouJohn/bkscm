@@ -6,20 +6,17 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { LineChange, commands, Disposable, MessageOptions, Position, ProgressLocation, QuickPickItem, Range, SourceControlResourceState, TextDocumentShowOptions, TextEditor, Uri, ViewColumn, window, workspace, WorkspaceEdit, WorkspaceFolder, Selection, TextDocumentContentProvider, InputBoxValidationSeverity, TabInputText, TabInputTextMerge, TimelineItem, Command } from 'vscode';
+import { commands, Disposable, MessageOptions, ProgressLocation, QuickPickItem, Range, SourceControlResourceState, TextDocumentShowOptions, Uri, ViewColumn, window, workspace, WorkspaceFolder, TextDocumentContentProvider, InputBoxValidationSeverity, TabInputText } from 'vscode';
 import * as nls from 'vscode-nls';
 import { uniqueNamesGenerator, adjectives, animals, colors, NumberDictionary } from '@joaomoreno/unique-names-generator';
 import { Branch, ForcePushMode, BkErrorCodes, Ref, RefType, Status, CommitOptions, RemoteSourcePublisher } from './api/bk';
 import { Bk, Stash } from './bitkeeper';
 import { Model } from './model';
 import { Repository, Resource, ResourceGroupType } from './repository';
-import { applyLineChanges, getModifiedRange, intersectDiffWithRange, toLineRanges } from './staging';
-import { fromBkUri, toBkUri, isBkUri, toMergeUris } from './uri';
+import { fromBkUri, isBkUri, toMergeUris } from './uri';
 import { grep, isDescendant, pathEquals, relativePath } from './util';
 import { LogLevel, OutputChannelLogger } from './log';
 import { ApiRepository } from './api/api1';
-import { BkTimelineItem } from './timelineProvider';
-// import { pickRemoteSource } from './remoteSource';
 
 
 
@@ -317,8 +314,7 @@ export class CommandCenter {
 	constructor(
 		private bk: Bk,
 		private model: Model,
-		private outputChannelLogger: OutputChannelLogger,
-		// private telemetryReporter: TelemetryReporter
+		private outputChannelLogger: OutputChannelLogger
 	) {
 		this.disposables = Commands.map(({ commandId, key, method, options }) => {
 			const command = this.createCommand(commandId, key, method, options);
@@ -474,7 +470,6 @@ export class CommandCenter {
 					"outcome" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "comment": "The outcome of the bk operation" }
 				}
 			*/
-			//			this.telemetryReporter.sendTelemetryEvent('clone', { outcome: 'no_URL' });
 			return;
 		}
 
@@ -1061,44 +1056,44 @@ export class CommandCenter {
 		}
 	}
 
-	@command('bk.checkinChange')
-	async checkinChange(uri: Uri, changes: LineChange[], index: number): Promise<void> {
-		if (!uri) {
-			return;
-		}
+	// @command('bk.checkinChange')
+	// async checkinChange(uri: Uri, changes: LineChange[], index: number): Promise<void> {
+	// 	if (!uri) {
+	// 		return;
+	// 	}
 
-		const textEditor = window.visibleTextEditors.filter(e => e.document.uri.toString() === uri.toString())[0];
+	// 	const textEditor = window.visibleTextEditors.filter(e => e.document.uri.toString() === uri.toString())[0];
 
-		if (!textEditor) {
-			return;
-		}
+	// 	if (!textEditor) {
+	// 		return;
+	// 	}
 
-		await this._checkinChanges(textEditor, [changes[index]]);
+	// 	await this._checkinChanges(textEditor, [changes[index]]);
 
-		const firstCheckedInLine = changes[index].modifiedStartLineNumber - 1;
-		textEditor.selections = [new Selection(firstCheckedInLine, 0, firstCheckedInLine, 0)];
-	}
+	// 	const firstCheckedInLine = changes[index].modifiedStartLineNumber - 1;
+	// 	textEditor.selections = [new Selection(firstCheckedInLine, 0, firstCheckedInLine, 0)];
+	// }
 
-	@command('bk.checkinSelectedRanges', { diff: true })
-	async checkinSelectedChanges(changes: LineChange[]): Promise<void> {
-		const textEditor = window.activeTextEditor;
+	// @command('bk.checkinSelectedRanges', { diff: true })
+	// async checkinSelectedChanges(changes: LineChange[]): Promise<void> {
+	// 	const textEditor = window.activeTextEditor;
 
-		if (!textEditor) {
-			return;
-		}
+	// 	if (!textEditor) {
+	// 		return;
+	// 	}
 
-		const modifiedDocument = textEditor.document;
-		const selectedLines = toLineRanges(textEditor.selections, modifiedDocument);
-		const selectedChanges = changes
-			.map(diff => selectedLines.reduce<LineChange | null>((result, range) => result || intersectDiffWithRange(modifiedDocument, diff, range), null))
-			.filter(d => !!d) as LineChange[];
+	// 	const modifiedDocument = textEditor.document;
+	// 	const selectedLines = toLineRanges(textEditor.selections, modifiedDocument);
+	// 	const selectedChanges = changes
+	// 		.map(diff => selectedLines.reduce<LineChange | null>((result, range) => result || intersectDiffWithRange(modifiedDocument, diff, range), null))
+	// 		.filter(d => !!d) as LineChange[];
 
-		if (!selectedChanges.length) {
-			return;
-		}
+	// 	if (!selectedChanges.length) {
+	// 		return;
+	// 	}
 
-		await this._checkinChanges(textEditor, selectedChanges);
-	}
+	// 	await this._checkinChanges(textEditor, selectedChanges);
+	// }
 
 	@command('bk.acceptMerge')
 	async acceptMerge(uri: Uri | unknown): Promise<void> {
@@ -1128,7 +1123,7 @@ export class CommandCenter {
 
 		// find the merge editor tabs for the resource in question and close them all
 		let didCloseTab = false;
-		const mergeEditorTabs = window.tabGroups.all.map(group => group.tabs.filter(tab => tab.input instanceof TabInputTextMerge && tab.input.result.toString() === uri.toString())).flat();
+		const mergeEditorTabs = window.tabGroups.all.map(group => group.tabs.filter(tab => tab.input instanceof TabInputText && tab.input.uri.toString() === uri.toString())).flat();
 		if (mergeEditorTabs.includes(activeTab)) {
 			didCloseTab = await window.tabGroups.close(mergeEditorTabs, true);
 		}
@@ -1141,129 +1136,129 @@ export class CommandCenter {
 		}
 	}
 
-	@command('bk.runBkMerge')
-	async runBkMergeNoDiff3(): Promise<void> {
-		await this.runBkMerge(false);
-	}
+	// @command('bk.runBkMerge')
+	// async runBkMergeNoDiff3(): Promise<void> {
+	// 	await this.runBkMerge(false);
+	// }
 
-	@command('bk.runBkMergeDiff3')
-	async runBkMergeDiff3(): Promise<void> {
-		await this.runBkMerge(true);
-	}
+	// @command('bk.runBkMergeDiff3')
+	// async runBkMergeDiff3(): Promise<void> {
+	// 	await this.runBkMerge(true);
+	// }
 
-	private async runBkMerge(diff3: boolean): Promise<void> {
-		const { activeTab } = window.tabGroups.activeTabGroup;
-		if (!activeTab) {
-			return;
-		}
+	// private async runBkMerge(diff3: boolean): Promise<void> {
+	// 	const { activeTab } = window.tabGroups.activeTabGroup;
+	// 	if (!activeTab) {
+	// 		return;
+	// 	}
 
-		const input = activeTab.input;
-		if (!(input instanceof TabInputTextMerge)) {
-			return;
-		}
+	// 	const input = activeTab.input;
+	// 	if (!(input instanceof TabInputTextMerge)) {
+	// 		return;
+	// 	}
 
-		const result = await this.bk.mergeFile({
-			basePath: input.base.fsPath,
-			input1Path: input.input1.fsPath,
-			input2Path: input.input2.fsPath,
-			diff3,
-		});
+	// 	const result = await this.bk.mergeFile({
+	// 		basePath: input.base.fsPath,
+	// 		input1Path: input.input1.fsPath,
+	// 		input2Path: input.input2.fsPath,
+	// 		diff3,
+	// 	});
 
-		const doc = workspace.textDocuments.find(doc => doc.uri.toString() === input.result.toString());
-		if (!doc) {
-			return;
-		}
-		const e = new WorkspaceEdit();
+	// 	const doc = workspace.textDocuments.find(doc => doc.uri.toString() === input.uri.toString());
+	// 	if (!doc) {
+	// 		return;
+	// 	}
+	// 	const e = new WorkspaceEdit();
 
-		e.replace(
-			input.result,
-			new Range(
-				new Position(0, 0),
-				new Position(doc.lineCount, 0),
-			),
-			result
-		);
-		await workspace.applyEdit(e);
-	}
+	// 	e.replace(
+	// 		input.result,
+	// 		new Range(
+	// 			new Position(0, 0),
+	// 			new Position(doc.lineCount, 0),
+	// 		),
+	// 		result
+	// 	);
+	// 	await workspace.applyEdit(e);
+	// }
 
-	private async _checkinChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
-		const modifiedDocument = textEditor.document;
-		const modifiedUri = modifiedDocument.uri;
+	// private async _checkinChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+	// 	const modifiedDocument = textEditor.document;
+	// 	const modifiedUri = modifiedDocument.uri;
 
-		if (modifiedUri.scheme !== 'file') {
-			return;
-		}
+	// 	if (modifiedUri.scheme !== 'file') {
+	// 		return;
+	// 	}
 
-		const originalUri = toBkUri(modifiedUri, '~');
-		const originalDocument = await workspace.openTextDocument(originalUri);
-		const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+	// 	const originalUri = toBkUri(modifiedUri, '~');
+	// 	const originalDocument = await workspace.openTextDocument(originalUri);
+	// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
 
-		await this.runByRepository(modifiedUri, async (repository, resource) => await repository.checkin(resource, result));
-	}
+	// 	await this.runByRepository(modifiedUri, async (repository, resource) => await repository.checkin(resource, result));
+	// }
 
-	@command('bk.revertChange')
-	async revertChange(uri: Uri, changes: LineChange[], index: number): Promise<void> {
-		if (!uri) {
-			return;
-		}
+	// @command('bk.revertChange')
+	// async revertChange(uri: Uri, changes: LineChange[], index: number): Promise<void> {
+	// 	if (!uri) {
+	// 		return;
+	// 	}
 
-		const textEditor = window.visibleTextEditors.filter(e => e.document.uri.toString() === uri.toString())[0];
+	// 	const textEditor = window.visibleTextEditors.filter(e => e.document.uri.toString() === uri.toString())[0];
 
-		if (!textEditor) {
-			return;
-		}
+	// 	if (!textEditor) {
+	// 		return;
+	// 	}
 
-		await this._revertChanges(textEditor, [...changes.slice(0, index), ...changes.slice(index + 1)]);
+	// 	await this._revertChanges(textEditor, [...changes.slice(0, index), ...changes.slice(index + 1)]);
 
-		const firstCheckedInLine = changes[index].modifiedStartLineNumber - 1;
-		textEditor.selections = [new Selection(firstCheckedInLine, 0, firstCheckedInLine, 0)];
-	}
+	// 	const firstCheckedInLine = changes[index].modifiedStartLineNumber - 1;
+	// 	textEditor.selections = [new Selection(firstCheckedInLine, 0, firstCheckedInLine, 0)];
+	// }
 
-	@command('bk.revertSelectedRanges', { diff: true })
-	async revertSelectedRanges(changes: LineChange[]): Promise<void> {
-		const textEditor = window.activeTextEditor;
+	// @command('bk.revertSelectedRanges', { diff: true })
+	// async revertSelectedRanges(changes: LineChange[]): Promise<void> {
+	// 	const textEditor = window.activeTextEditor;
 
-		if (!textEditor) {
-			return;
-		}
+	// 	if (!textEditor) {
+	// 		return;
+	// 	}
 
-		const modifiedDocument = textEditor.document;
-		const selections = textEditor.selections;
-		const selectedChanges = changes.filter(change => {
-			const modifiedRange = getModifiedRange(modifiedDocument, change);
-			return selections.every(selection => !selection.intersection(modifiedRange));
-		});
+	// 	const modifiedDocument = textEditor.document;
+	// 	const selections = textEditor.selections;
+	// 	const selectedChanges = changes.filter(change => {
+	// 		const modifiedRange = getModifiedRange(modifiedDocument, change);
+	// 		return selections.every(selection => !selection.intersection(modifiedRange));
+	// 	});
 
-		if (selectedChanges.length === changes.length) {
-			return;
-		}
+	// 	if (selectedChanges.length === changes.length) {
+	// 		return;
+	// 	}
 
-		const selectionsBeforeRevert = textEditor.selections;
-		await this._revertChanges(textEditor, selectedChanges);
-		textEditor.selections = selectionsBeforeRevert;
-	}
+	// 	const selectionsBeforeRevert = textEditor.selections;
+	// 	await this._revertChanges(textEditor, selectedChanges);
+	// 	textEditor.selections = selectionsBeforeRevert;
+	// }
 
-	private async _revertChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
-		const modifiedDocument = textEditor.document;
-		const modifiedUri = modifiedDocument.uri;
+	// private async _revertChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+	// 	const modifiedDocument = textEditor.document;
+	// 	const modifiedUri = modifiedDocument.uri;
 
-		if (modifiedUri.scheme !== 'file') {
-			return;
-		}
+	// 	if (modifiedUri.scheme !== 'file') {
+	// 		return;
+	// 	}
 
-		const originalUri = toBkUri(modifiedUri, '~');
-		const originalDocument = await workspace.openTextDocument(originalUri);
-		const visibleRangesBeforeRevert = textEditor.visibleRanges;
-		const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+	// 	const originalUri = toBkUri(modifiedUri, '~');
+	// 	const originalDocument = await workspace.openTextDocument(originalUri);
+	// 	const visibleRangesBeforeRevert = textEditor.visibleRanges;
+	// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
 
-		const edit = new WorkspaceEdit();
-		edit.replace(modifiedUri, new Range(new Position(0, 0), modifiedDocument.lineAt(modifiedDocument.lineCount - 1).range.end), result);
-		workspace.applyEdit(edit);
+	// 	const edit = new WorkspaceEdit();
+	// 	edit.replace(modifiedUri, new Range(new Position(0, 0), modifiedDocument.lineAt(modifiedDocument.lineCount - 1).range.end), result);
+	// 	workspace.applyEdit(edit);
 
-		await modifiedDocument.save();
+	// 	await modifiedDocument.save();
 
-		textEditor.revealRange(visibleRangesBeforeRevert[0]);
-	}
+	// 	textEditor.revealRange(visibleRangesBeforeRevert[0]);
+	// }
 
 	// @command('bk.uncheckin')
 	// async uncheckin(...resourceStates: SourceControlResourceState[]): Promise<void> {
@@ -2964,46 +2959,46 @@ export class CommandCenter {
 		return result && result.stash;
 	}
 
-	@command('bk.timeline.openDiff', { repository: false })
-	async timelineOpenDiff(item: TimelineItem, uri: Uri | undefined, _source: string) {
-		const cmd = this.resolveTimelineOpenDiffCommand(
-			item, uri,
-			{
-				preserveFocus: true,
-				preview: true,
-				viewColumn: ViewColumn.Active
-			},
-		);
-		if (cmd === undefined) {
-			return undefined;
-		}
+	// @command('bk.timeline.openDiff', { repository: false })
+	// async timelineOpenDiff(item: TimelineItem, uri: Uri | undefined, _source: string) {
+	// 	const cmd = this.resolveTimelineOpenDiffCommand(
+	// 		item, uri,
+	// 		{
+	// 			preserveFocus: true,
+	// 			preview: true,
+	// 			viewColumn: ViewColumn.Active
+	// 		},
+	// 	);
+	// 	if (cmd === undefined) {
+	// 		return undefined;
+	// 	}
 
-		return commands.executeCommand(cmd.command, ...(cmd.arguments ?? []));
-	}
+	// 	return commands.executeCommand(cmd.command, ...(cmd.arguments ?? []));
+	// }
 
-	resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
-		if (uri === undefined || uri === null || !BkTimelineItem.is(item)) {
-			return undefined;
-		}
+	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
+	// 	if (uri === undefined || uri === null || !BkTimelineItem.is(item)) {
+	// 		return undefined;
+	// 	}
 
-		const basename = path.basename(uri.fsPath);
+	// 	const basename = path.basename(uri.fsPath);
 
-		let title;
-		if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
-			title = localize('bk.title.workingTree', '{0} (Working Tree)', basename);
-		}
-		else if (item.previousRef === 'HEAD' && item.ref === '~') {
-			title = localize('bk.title.index', '{0} (Index)', basename);
-		} else {
-			title = localize('bk.title.diffRefs', '{0} ({1}) ↔ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
-		}
+	// 	let title;
+	// 	if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
+	// 		title = localize('bk.title.workingTree', '{0} (Working Tree)', basename);
+	// 	}
+	// 	else if (item.previousRef === 'HEAD' && item.ref === '~') {
+	// 		title = localize('bk.title.index', '{0} (Index)', basename);
+	// 	} else {
+	// 		title = localize('bk.title.diffRefs', '{0} ({1}) ↔ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
+	// 	}
 
-		return {
-			command: 'vscode.diff',
-			title: localize('bk.timeline.openDiffCommand', "Open Comparison"),
-			arguments: [toBkUri(uri, item.previousRef), item.ref === '' ? uri : toBkUri(uri, item.ref), title, options]
-		};
-	}
+	// 	return {
+	// 		command: 'vscode.diff',
+	// 		title: localize('bk.timeline.openDiffCommand', "Open Comparison"),
+	// 		arguments: [toBkUri(uri, item.previousRef), item.ref === '' ? uri : toBkUri(uri, item.ref), title, options]
+	// 	};
+	// }
 
 	// @command('bk.timeline.copyCommitId', { repository: false })
 	// async timelineCopyCommitId(item: TimelineItem, _uri: Uri | undefined, _source: string) {

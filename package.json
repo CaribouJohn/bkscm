@@ -10,21 +10,6 @@
   "engines": {
     "vscode": "^1.71.0"
   },
-  "enabledApiProposals": [
-    "diffCommand",
-    "contribEditorContentMenu",
-    "contribViewsWelcome",
-    "editSessionIdentityProvider",
-    "envShellEvent",
-    "scmActionButton",
-    "scmSelectedProvider",
-    "scmValidation",
-    "tabInputTextMerge",
-    "timeline",
-    "contribMergeEditorMenus",
-    "telemetry",
-    "resolvers"
-  ],
   "categories": [
     "Other"
   ],
@@ -1484,27 +1469,6 @@
           "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.bk.enabled && !bk.missing && bkOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^bk$|^file$/"
         }
       ],
-      "editor/content": [
-        {
-          "command": "bk.acceptMerge",
-          "when": "isMergeResultEditor && mergeEditorBaseUri =~ /^(bk|file):/ && mergeEditorResultUri in bk.mergeChanges"
-        },
-        {
-          "command": "bk.openMergeEditor",
-          "group": "navigation@-10",
-          "when": "config.bk.enabled && !bk.missing && !isInDiffEditor && !isMergeEditor && resource in bk.mergeChanges"
-        }
-      ],
-      "mergeEditor/result/title": [
-        {
-          "command": "bk.runBkMerge",
-          "when": "isMergeEditor"
-        },
-        {
-          "command": "bk.runBkMergeDiff3",
-          "when": "isMergeEditor"
-        }
-      ],
       "scm/change/title": [
         {
           "command": "bk.checkinChange",
@@ -2675,10 +2639,14 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/byline": "^4.2.33",
+    "@types/file-type": "^10.9.1",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.57",
-    "@types/vscode": "^1.71.0",
+    "@types/picomatch": "^2.3.0",
+    "@types/vscode": "^1.70.0",
+    "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "@vscode/iconv-lite-umd": "^0.7.0",
@@ -2691,10 +2659,6 @@
   },
   "dependencies": {
     "@joaomoreno/unique-names-generator": "^5.0.0",
-    "@types/byline": "^4.2.33",
-    "@types/file-type": "^10.9.1",
-    "@types/picomatch": "^2.3.0",
-    "@types/which": "^2.0.1",
     "byline": "^5.0.0",
     "file-type": "^16.5.4",
     "jschardet": "^3.0.0",

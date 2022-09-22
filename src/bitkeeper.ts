@@ -534,10 +534,13 @@ export class Bk {
 
 	async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
 		options = assign({ cwd }, options || {});
+		options.log = true;
+
 		return await this._exec(args, options);
 	}
 
 	async exec2(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
+		options.log = true;
 		return await this._exec(args, options);
 	}
 
@@ -559,7 +562,6 @@ export class Bk {
 		const child = this.spawn(args, options);
 
 		options.onSpawn?.(child);
-
 		if (options.input) {
 			child.stdin!.end(options.input, 'utf8');
 		}
@@ -619,8 +621,9 @@ export class Bk {
 			options.stdio = ['ignore', null, null]; // Unless provided, ignore stdin and leave default streams for stdout and stderr
 		}
 
-		options.env = assign({}, process.env, this.env, options.env || {}, {
-			VSCODE_BK_COMMAND: args[0],
+//		options.env = assign({}, process.env, this.env, options.env || {}, {
+			options.env = assign({}, process.env, options.env || {}, {
+				VSCODE_BK_COMMAND: args[0],
 			LC_ALL: 'en_US.UTF-8',
 			LANG: 'en_US.UTF-8',
 			BK_PAGER: 'cat'

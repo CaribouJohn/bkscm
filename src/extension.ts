@@ -16,7 +16,6 @@ import { BkDecorations } from './decorationProvider';
 import { BkExtension } from './api/bk';
 import { BkExtensionImpl } from './api/extension';
 import { registerAPICommands } from './api/api1';
-import { BkTimelineProvider } from './timelineProvider';
 
 
 
@@ -174,7 +173,7 @@ async function createModel(context: ExtensionContext, outputChannelLogger: Outpu
 		cc,
 		new BkFileSystemProvider(model),
 		new BkDecorations(model),
-		new BkTimelineProvider(model, cc),
+		//new BkTimelineProvider(model, cc),
 		//new BkEditSessionIdentityProvider(model)
 	);
 

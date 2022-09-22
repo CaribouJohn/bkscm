@@ -101,7 +101,9 @@ export function once(fn: (...args: any[]) => any): (...args: any[]) => any {
 
 export function assign<T>(destination: T, ...sources: any[]): T {
 	for (const source of sources) {
-		Object.keys(source).forEach(key => (destination as any)[key] = source[key]);
+		if (source) {
+			Object.keys(source).forEach(key => (destination as any)[key] = source[key]);
+		}
 	}
 
 	return destination;

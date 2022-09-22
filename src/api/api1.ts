@@ -7,7 +7,7 @@
 import { Model } from '../model';
 import { Repository as BaseRepository, Resource } from '../repository';
 import { InputBox, Bk, API, Repository, Remote, RepositoryState, Branch, ForcePushMode, Ref, Commit, Change, RepositoryUIState, Status, LogOptions, APIState, CommitOptions, RefType, CredentialsProvider, PushErrorHandler, PublishEvent, FetchOptions, RemoteSourceProvider, RemoteSourcePublisher, PostCommitCommandsProvider } from './bk';
-import { Event, SourceControlInputBox, Uri, SourceControl, Disposable, commands } from 'vscode';
+import { Event, SourceControlInputBox, Uri, Disposable, commands } from 'vscode';
 import { combinedDisposable, mapEvent } from '../util';
 import { toBkUri } from '../uri';
 import { BkExtensionImpl } from './extension';
@@ -51,9 +51,9 @@ export class ApiRepositoryUIState implements RepositoryUIState {
 
   get selected(): boolean { return false; }
 
-  readonly onDidChange: Event<void> = mapEvent<boolean, void>(this._sourceControl.onDidChangeSelection, () => null);
+  //readonly onDidChange: Event<void> = mapEvent<boolean, void>(this._sourceControl.onDidChangeSelection, () => null);
 
-  constructor(private _sourceControl: SourceControl) { }
+  constructor() { }
 }
 
 export class ApiRepository implements Repository {
@@ -61,7 +61,8 @@ export class ApiRepository implements Repository {
   readonly rootUri: Uri = Uri.file(this.repository.root);
   readonly inputBox: InputBox = new ApiInputBox(this.repository.inputBox);
   readonly state: RepositoryState = new ApiRepositoryState(this.repository);
-  readonly ui: RepositoryUIState = new ApiRepositoryUIState(this.repository.sourceControl);
+  //readonly ui: RepositoryUIState = new ApiRepositoryUIState(this.repository.sourceControl);
+  readonly ui: RepositoryUIState = new ApiRepositoryUIState();
 
   constructor(readonly repository: BaseRepository) { }
 
