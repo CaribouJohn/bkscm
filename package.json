@@ -2,7 +2,7 @@
   "name": "bkscm",
   "displayName": "bkSCM",
   "description": "SCM for bitkeeper",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "publisher": "CaribouJohn",
   "repository": {
     "url": "https://github.com/CaribouJohn/bkscm"
@@ -2559,76 +2559,7 @@
       "[bk-rebase]": {
         "workbench.editor.restoreViewState": false
       }
-    },
-    "viewsWelcome": [
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.disabled%",
-        "when": "!config.bk.enabled"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.missing%",
-        "when": "config.bk.enabled && bk.missing"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.missing.mac%",
-        "when": "config.bk.enabled && bk.missing && isMac"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.missing.windows%",
-        "when": "config.bk.enabled && bk.missing && isWindows"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.missing.linux%",
-        "when": "config.bk.enabled && bk.missing && isLinux"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.empty%",
-        "when": "config.bk.enabled && !bk.missing && workbenchState == empty",
-        "enablement": "bk.state == initialized",
-        "group": "2_open@1"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.folder%",
-        "when": "config.bk.enabled && !bk.missing && workbenchState == folder",
-        "enablement": "bk.state == initialized",
-        "group": "5_scm@1"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.workspace%",
-        "when": "config.bk.enabled && !bk.missing && workbenchState == workspace && workspaceFolderCount != 0",
-        "enablement": "bk.state == initialized",
-        "group": "5_scm@1"
-      },
-      {
-        "view": "scm",
-        "contents": "%view.workbench.scm.emptyWorkspace%",
-        "when": "config.bk.enabled && !bk.missing && workbenchState == workspace && workspaceFolderCount == 0",
-        "enablement": "bk.state == initialized",
-        "group": "2_open@1"
-      },
-      {
-        "view": "explorer",
-        "contents": "%view.workbench.cloneRepository%",
-        "when": "config.bk.enabled",
-        "enablement": "bk.state == initialized",
-        "group": "5_scm@1"
-      },
-      {
-        "view": "explorer",
-        "contents": "%view.workbench.learnMore%",
-        "when": "config.bk.enabled",
-        "enablement": "bk.state == initialized",
-        "group": "5_scm@10"
-      }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -2640,7 +2571,6 @@
   },
   "devDependencies": {
     "@types/byline": "^4.2.33",
-    "@types/file-type": "^10.9.1",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.11.57",
@@ -2649,20 +2579,20 @@
     "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
-    "@vscode/iconv-lite-umd": "^0.7.0",
     "@vscode/test-electron": "^2.1.5",
     "eslint": "^8.20.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
-    "typescript": "^4.7.4",
-    "vscode-nls": "^5.2.0"
+    "typescript": "^4.7.4"
   },
   "dependencies": {
+    "@vscode/iconv-lite-umd": "^0.7.0",
     "@joaomoreno/unique-names-generator": "^5.0.0",
     "byline": "^5.0.0",
     "file-type": "^16.5.4",
     "jschardet": "^3.0.0",
     "picomatch": "^2.3.1",
+    "vscode-nls": "^5.2.0",
     "which": "^2.0.2"
   }
 }
