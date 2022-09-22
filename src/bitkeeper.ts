@@ -371,7 +371,7 @@ export class Bk {
 	readonly path: string;
 	readonly userAgent: string;
 	readonly version: string;
-	private env: any;
+	//private env: any;
 	private commandsToLog: string[] = [];
 
 	private _onOutput = new EventEmitter();
@@ -381,7 +381,7 @@ export class Bk {
 		this.path = options.bkPath;
 		this.version = options.version;
 		this.userAgent = options.userAgent;
-		this.env = options.env || {};
+		//this.env = options.env || {};
 
 		const onConfigurationChanged = (e?: ConfigurationChangeEvent) => {
 			if (e !== undefined && !e.affectsConfiguration('bk.commandsToLog')) {

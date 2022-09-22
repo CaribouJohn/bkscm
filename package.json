@@ -2,7 +2,7 @@
   "name": "bkscm",
   "displayName": "bkSCM",
   "description": "SCM for bitkeeper",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "CaribouJohn",
   "repository": {
     "url": "https://github.com/CaribouJohn/bkscm"
